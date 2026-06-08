@@ -130,26 +130,6 @@
 </style>
 </head>
 <body>
-  <div id="debug-log" style="position:fixed;top:10px;left:10px;z-index:99999;background:rgba(255,0,0,0.9);color:white;padding:10px;font-family:monospace;font-size:12px;max-width:90%;max-height:200px;overflow:auto;pointer-events:none;border-radius:8px;white-space:pre-wrap;display:none;"></div>
-  <script>
-    window.onerror = function(msg, url, line, col, error) {
-      var debugEl = document.getElementById('debug-log');
-      if (debugEl) {
-        debugEl.style.display = 'block';
-        debugEl.innerText += '\nError: ' + msg + ' (Line: ' + line + ', Col: ' + col + ')';
-      }
-      return false;
-    };
-    var origError = console.error;
-    console.error = function() {
-      origError.apply(console, arguments);
-      var debugEl = document.getElementById('debug-log');
-      if (debugEl) {
-        debugEl.style.display = 'block';
-        debugEl.innerText += '\nConsole Error: ' + Array.prototype.slice.call(arguments).join(' ');
-      }
-    };
-  </script>
   <div id="root"></div>
   <script type="text/babel" src="ui.jsx"></script>
   <script type="text/babel" src="landing.jsx"></script>
