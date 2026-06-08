@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Паспорт жизни</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          ink:    '#0E0A1F',
+          ink2:   '#15102E',
+          ink3:   '#1B1438',
+          gold:   '#E3B23C',
+          goldlt: '#F2D98B',
+          golddk: '#C8922B',
+          lav:    '#EDEAF5',
+          lavmut: '#A89FC4',
+          lavdim: '#7E769B',
+        },
+        fontFamily: {
+          serif: ['"Playfair Display"', 'Georgia', 'serif'],
+          sans:  ['Inter', 'system-ui', 'sans-serif'],
+        },
+        borderRadius: { '4xl': '2rem' },
+      },
+    },
+  };
+</script>
+<style>
+  html { scroll-behavior: smooth; overflow-x: clip; }
+  body {
+    margin: 0;
+    background: #0B0717;
+    color: #EDEAF5;
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: rgba(227,178,60,.3); color: #fff; }
+
+  /* deep cosmic page background */
+  .cosmic-bg {
+    background:
+      radial-gradient(1200px 700px at 78% -8%, rgba(120,78,200,.28), transparent 60%),
+      radial-gradient(900px 600px at 12% 18%, rgba(70,46,130,.22), transparent 58%),
+      radial-gradient(1100px 800px at 50% 120%, rgba(96,64,170,.20), transparent 60%),
+      linear-gradient(180deg, #0E0A1F 0%, #120D27 45%, #0C0820 100%);
+  }
+
+  .gold-text {
+    background: linear-gradient(180deg, #F6E2A6 0%, #E3B23C 55%, #CD9A2E 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .gold-btn {
+    background: linear-gradient(135deg, #F6E2A6 0%, #E3B23C 48%, #C8922B 100%);
+    box-shadow: 0 10px 34px -10px rgba(227,178,60,.65), inset 0 1px 0 rgba(255,255,255,.45);
+    transition: transform .25s cubic-bezier(.22,1,.36,1), box-shadow .25s ease, filter .25s ease;
+  }
+  .gold-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 50px -10px rgba(227,178,60,.85), 0 0 0 1px rgba(246,226,166,.25), inset 0 1px 0 rgba(255,255,255,.5);
+    filter: brightness(1.04);
+  }
+  .gold-btn:active { transform: translateY(0); filter: brightness(.97); }
+
+  .glass-card {
+    background: linear-gradient(180deg, rgba(40,30,72,.55) 0%, rgba(22,16,46,.55) 100%);
+    border: 1px solid rgba(227,178,60,.14);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .lift {
+    transition: transform .35s cubic-bezier(.22,1,.36,1), box-shadow .35s ease, border-color .35s ease;
+  }
+  .lift:hover {
+    transform: translateY(-6px);
+    border-color: rgba(227,178,60,.38);
+    box-shadow: 0 26px 60px -28px rgba(0,0,0,.8), 0 0 44px -18px rgba(227,178,60,.30);
+  }
+
+  .field {
+    background: rgba(13,9,30,.6);
+    border: 1px solid rgba(168,159,196,.22);
+    color: #EDEAF5;
+    transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+  }
+  .field::placeholder { color: #6E668A; }
+  .field:focus {
+    outline: none;
+    border-color: rgba(227,178,60,.6);
+    box-shadow: 0 0 0 4px rgba(227,178,60,.14);
+    background: rgba(13,9,30,.85);
+  }
+  .field.err { border-color: rgba(232,120,120,.7); box-shadow: 0 0 0 3px rgba(232,120,120,.12); }
+  input[type="date"].field, input[type="time"].field { color-scheme: dark; }
+
+  /* scroll reveal — resting state is fully visible (CSS fallback) */
+  .reveal { opacity: 1; transform: none; }
+
+  @keyframes twinkle { 0%,100% { opacity: .15; } 50% { opacity: 1; } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes spinSlow { to { transform: rotate(360deg); } }
+  @keyframes pulseGlow { 0%,100% { opacity: .45; transform: scale(.94); } 50% { opacity: .9; transform: scale(1.06); } }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+  @keyframes fadeUp { from { opacity: .3; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+  .spin-slow { animation: spinSlow 60s linear infinite; transform-origin: center; }
+  .fade-up { animation: fadeUp .5s ease both; }
+
+  [data-lucide] { width: 1em; height: 1em; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal, .reveal.in { transition: none !important; transform: none !important; opacity: 1 !important; }
+    .fade-up { animation: none !important; transform: none !important; opacity: 1 !important; }
+    .spin-slow, .gold-btn { animation: none !important; }
+  }
+</style>
+</head>
+<body>
+  <div id="debug-log" style="position:fixed;top:10px;left:10px;z-index:99999;background:rgba(255,0,0,0.9);color:white;padding:10px;font-family:monospace;font-size:12px;max-width:90%;max-height:200px;overflow:auto;pointer-events:none;border-radius:8px;white-space:pre-wrap;display:none;"></div>
+  <script>
+    window.onerror = function(msg, url, line, col, error) {
+      var debugEl = document.getElementById('debug-log');
+      if (debugEl) {
+        debugEl.style.display = 'block';
+        debugEl.innerText += '\nError: ' + msg + ' (Line: ' + line + ', Col: ' + col + ')';
+      }
+      return false;
+    };
+    var origError = console.error;
+    console.error = function() {
+      origError.apply(console, arguments);
+      var debugEl = document.getElementById('debug-log');
+      if (debugEl) {
+        debugEl.style.display = 'block';
+        debugEl.innerText += '\nConsole Error: ' + Array.prototype.slice.call(arguments).join(' ');
+      }
+    };
+  </script>
+  <div id="root"></div>
+  <script type="text/babel" src="ui.jsx"></script>
+  <script type="text/babel" src="landing.jsx"></script>
+  <script type="text/babel" src="app.jsx"></script>
+</body>
+</html>

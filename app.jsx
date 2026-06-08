@@ -1,0 +1,243 @@
+const { useState, useEffect, useRef } = React;
+
+/* ════════════════════════════════════════════════════════════
+   STATE 2 — PROGRESS
+   ════════════════════════════════════════════════════════════ */
+const STAGES = [
+  'Создаём Паспорт жизни...',
+  'Анализируем данные...',
+  'Формируем персональный профиль...',
+  'Выполняем расчёты...',
+  'Формируем результат...',
+  'Генерируем PDF-документ...',
+  'Подготавливаем файл к скачиванию...',
+  'Готово.',
+];
+
+function Progress({ name, onDone }) {
+  const [pct, setPct] = useState(0);
+  const pctRef = useRef(0);
+
+  useEffect(() => {
+    const iv = setInterval(() => {
+      let p = pctRef.current;
+      if (p < 100) {
+        const step = p < 75 ? 1.4 + Math.random() * 1.6 : 0.5 + Math.random() * 0.9;
+        p = Math.min(100, p + step);
+        pctRef.current = p;
+        setPct(p);
+      } else {
+        clearInterval(iv);
+        setTimeout(onDone, 900);
+      }
+    }, 45);
+    return () => clearInterval(iv);
+  }, [onDone]);
+
+  const stageIdx = Math.min(STAGES.length - 1, Math.floor((pct / 100) * (STAGES.length - 1) + 0.0001));
+  const ring = 2 * Math.PI * 86;
+
+  return (
+    <div className="cosmic-bg relative min-h-screen overflow-hidden flex items-center justify-center px-6">
+      <StarField count={110} />
+      <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[640px] w-[640px] rounded-full bg-[radial-gradient(circle,rgba(124,82,200,.30),transparent_62%)]"></div>
+
+      <div className="relative flex flex-col items-center text-center fade-up">
+        {/* circular gauge */}
+        <div className="relative h-[220px] w-[220px]">
+          {/* pulsing halo */}
+          <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle,rgba(227,178,60,.28),transparent_60%)]"
+            style={{ animation: 'pulseGlow 2.4s ease-in-out infinite' }}></div>
+          {/* rotating dashed ring */}
+          <svg className="absolute inset-0" viewBox="0 0 220 220" style={{ animation: 'spin 14s linear infinite', transformOrigin: 'center' }}>
+            <circle cx="110" cy="110" r="102" fill="none" stroke="rgba(227,178,60,.22)" strokeWidth="1" strokeDasharray="2 10" />
+          </svg>
+          {/* progress ring */}
+          <svg className="absolute inset-0 -rotate-90" viewBox="0 0 220 220">
+            <circle cx="110" cy="110" r="86" fill="none" stroke="rgba(168,159,196,.16)" strokeWidth="6" />
+            <circle cx="110" cy="110" r="86" fill="none" stroke="url(#gg)" strokeWidth="6" strokeLinecap="round"
+              strokeDasharray={ring} strokeDashoffset={ring * (1 - pct / 100)}
+              style={{ transition: 'stroke-dashoffset .12s linear' }} />
+            <defs>
+              <linearGradient id="gg" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor="#F6E2A6" />
+                <stop offset="100%" stopColor="#C8922B" />
+              </linearGradient>
+            </defs>
+          </svg>
+          {/* center */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <div className="font-serif text-[52px] leading-none gold-text">{Math.round(pct)}<span className="text-[26px]">%</span></div>
+            <Icon name="sparkles" className="mt-2 text-gold text-[20px]" style={{ animation: 'floaty 3s ease-in-out infinite' }} />
+          </div>
+        </div>
+
+        <h2 className="mt-12 font-serif text-[clamp(1.8rem,4vw,2.6rem)] text-lav">
+          Создаём <span className="gold-text italic">Паспорт</span>{name ? <>, {name}</> : ''}
+        </h2>
+
+        {/* linear bar */}
+        <div className="mt-7 h-1.5 w-[min(440px,80vw)] overflow-hidden rounded-full bg-white/[.08]">
+          <div className="h-full rounded-full bg-gradient-to-r from-goldlt via-gold to-golddk transition-[width] duration-150 shadow-[0_0_16px_rgba(227,178,60,.6)]"
+            style={{ width: pct + '%' }}></div>
+        </div>
+
+        <div className="mt-6 h-6 font-sans text-[15px] tracking-wide text-lavmut">
+          <span key={stageIdx} className="fade-up inline-block">{STAGES[stageIdx]}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════
+   STATE 3 — RESULT
+   ════════════════════════════════════════════════════════════ */
+function getZodiacSign(dateStr) {
+  if (!dateStr) return { name: 'Космос', symbol: '✨' };
+  const date = new Date(dateStr);
+  const m = date.getMonth() + 1;
+  const d = date.getDate();
+  if ((m === 3 && d >= 21) || (m === 4 && d <= 19)) return { name: 'Овен', symbol: '♈' };
+  if ((m === 4 && d >= 20) || (m === 5 && d <= 20)) return { name: 'Телец', symbol: '♉' };
+  if ((m === 5 && d >= 21) || (m === 6 && d <= 20)) return { name: 'Близнецы', symbol: '♊' };
+  if ((m === 6 && d >= 21) || (m === 7 && d <= 22)) return { name: 'Рак', symbol: '♋' };
+  if ((m === 7 && d >= 23) || (m === 8 && d <= 22)) return { name: 'Лев', symbol: '♌' };
+  if ((m === 8 && d >= 23) || (m === 9 && d <= 22)) return { name: 'Дева', symbol: '♍' };
+  if ((m === 9 && d >= 23) || (m === 10 && d <= 22)) return { name: 'Весы', symbol: '♎' };
+  if ((m === 10 && d >= 23) || (m === 11 && d <= 21)) return { name: 'Скорпион', symbol: '♏' };
+  if ((m === 11 && d >= 22) || (m === 12 && d <= 21)) return { name: 'Стрелец', symbol: '♐' };
+  if ((m === 12 && d >= 22) || (m === 1 && d <= 19)) return { name: 'Козерог', symbol: '♑' };
+  if ((m === 1 && d >= 20) || (m === 2 && d <= 18)) return { name: 'Водолей', symbol: '♒' };
+  return { name: 'Рыбы', symbol: '♓' };
+}
+
+function Result({ data, onBack }) {
+  const name = data?.name;
+
+  const handleDownload = () => {
+    const zodiac = getZodiacSign(data?.bdate);
+    let eventsText = '';
+    if (data?.unknown && data?.events) {
+      eventsText = '\nВажные события жизненного пути:\n' + data.events
+        .filter(e => e.date || e.title)
+        .map((e, idx) => `${idx + 1}. [${e.date || 'Дата неизвестна'}] - ${e.title || 'Событие'}`)
+        .join('\n') + '\n';
+    }
+
+    const content = `===========================================================
+                      ПАСПОРТ ЖИЗНИ
+===========================================================
+Владелец: ${name?.toUpperCase() || 'ПУТЕШЕСТВЕННИК'}
+Дата расчета: ${new Date().toLocaleDateString('ru-RU')}
+-----------------------------------------------------------
+
+ДАННЫЕ РОЖДЕНИЯ И НАСТРОЙКИ КАРТЫ:
+- Имя: ${name || 'Не указано'}
+- Дата рождения: ${data?.bdate || 'Не указана'}
+- Время рождения: ${data?.unknown ? 'Неизвестно (расчет по событиям)' : (data?.btime || 'Не указано')}
+- Место рождения: ${data?.place || 'Не указано'}
+${data?.email ? `- Email: ${data?.email}\n` : ''}${eventsText}
+Знак зодиака: ${zodiac.name} (${zodiac.symbol})
+
+===========================================================
+РАЗДЕЛ 1: ЛИЧНОСТЬ И СУТЬ (Солнце в знаке ${zodiac.name})
+===========================================================
+Ваше солнце находится в знаке ${zodiac.name}. Это определяет ваше глубинное стремление к самовыражению и жизненную энергию. Вы обладаете врожденной способностью адаптироваться к изменениям и интуитивно находить выход из сложных ситуаций. Ваша истинная суть раскрывается тогда, когда вы следуете своему внутреннему компасу, а не внешним ожиданиям. В вас заложен сильный творческий потенциал и стремление к гармонии.
+
+===========================================================
+РАЗДЕЛ 2: ПУТЬ И ПРЕДНАЗНАЧЕНИЕ
+===========================================================
+Ваша жизненная траектория указывает на важность баланса между внутренним миром и социальными достижениями. Ваша сильная сторона — это аналитический склад ума в сочетании с глубокой эмпатией. 
+Предназначение состоит в том, чтобы трансформировать накопленный личный опыт в пользу для окружающих, создавая вокруг себя гармонию, стабильность и вдохновение. Звезды советуют доверять своей интуиции при выборе ключевых направлений развития.
+
+===========================================================
+РАЗДЕЛ 3: ЛЮБОВЬ И ОТНОШЕНИЯ
+===========================================================
+В отношениях для вас критически важны доверие, искренность и глубокая интеллектуальная связь. Вы ищете партнера, который разделяет ваши ценности и уважает ваше личное пространство. Ваша способность глубоко чувствовать эмоции других людей делает вас надежным, чутким и поддерживающим партнером, способным создавать уют и крепкие союзы.
+
+===========================================================
+РАЗДЕЛ 4: ЗОНЫ РОСТА И СКРЫТЫЕ СИЛЫ
+===========================================================
+- Скрытая сила: Высокая интуиция, устойчивость к кризисам и умение находить нестандартные решения в сложных ситуациях.
+- Зона роста: Умение делегировать задачи, снижать уровень контроля над внешними обстоятельствами и давать себе время на полноценный отдых.
+
+-----------------------------------------------------------
+Документ сгенерирован ИИ системы "Паспорт Жизни"
+Пусть звезды всегда освещают ваш путь!
+===========================================================`;
+
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Passport_of_Life_${name || 'User'}.txt`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <div className="cosmic-bg relative min-h-screen overflow-hidden flex items-center justify-center px-6 py-16">
+      <StarField count={90} />
+      <div className="pointer-events-none absolute left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/2 h-[560px] w-[560px] rounded-full bg-[radial-gradient(circle,rgba(124,82,200,.30),transparent_62%)]"></div>
+
+      <div className="relative w-full max-w-lg text-center fade-up">
+        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-gold/40 bg-gold/[.08] text-gold text-[30px] shadow-[0_0_40px_-8px_rgba(227,178,60,.6)]">
+          <Icon name="check" />
+        </div>
+        <Eyebrow className="mb-4">Готово</Eyebrow>
+        <h1 className="font-serif text-[clamp(2rem,5vw,3rem)] leading-tight text-lav">
+          Твой <span className="gold-text italic">Паспорт жизни</span> готов{name ? <>, {name}</> : ''}!
+        </h1>
+
+        {/* preview slot */}
+        <div className="relative mt-9 rounded-[28px] border border-gold/35 bg-gradient-to-b from-[#1A1338] to-[#0E0A1F] p-8 shadow-[0_50px_100px_-50px_rgba(0,0,0,.9)]">
+          <StarField count={24} />
+          <div className="relative mx-auto max-w-[300px]">
+            <ZodiacWheel size={300} />
+          </div>
+          <p className="relative mt-5 font-sans text-[12.5px] uppercase tracking-[0.24em] text-gold/80">Превью твоего Паспорта</p>
+        </div>
+
+        <div className="mt-8 flex justify-center">
+          <GoldButton icon="download" className="text-[16px] px-9 py-4" onClick={handleDownload}>Скачать Паспорт</GoldButton>
+        </div>
+        <p className="mt-4 font-sans text-[12.5px] text-lavdim">Скачиваемый файл содержит вашу полную карту и интерпретации.</p>
+
+        <button onClick={onBack} className="mt-9 inline-flex items-center gap-2 font-sans text-[14px] text-lavmut hover:text-gold transition-colors">
+          <Icon name="arrow-left" className="text-[16px]" /> Вернуться на главную
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════
+   APP — state machine
+   ════════════════════════════════════════════════════════════ */
+function App() {
+  const [screen, setScreen] = useState('landing'); // landing | progress | result
+  const [data, setData] = useState(null);
+
+  // refresh lucide icons after every render
+  useEffect(() => {
+    if (window.lucide) window.lucide.createIcons();
+  });
+
+  // scroll to top on screen change
+  useEffect(() => { window.scrollTo(0, 0); }, [screen]);
+
+  const start = (formData) => { setData(formData); setScreen('progress'); };
+  const finish = () => setScreen('result');
+  const reset = () => { setScreen('landing'); setData(null); };
+
+  return (
+    <div key={screen}>
+      {screen === 'landing' && <Landing onStart={start} />}
+      {screen === 'progress' && <Progress name={data?.name} onDone={finish} />}
+      {screen === 'result' && <Result data={data} onBack={reset} />}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
