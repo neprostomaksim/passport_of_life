@@ -220,12 +220,29 @@ function Result({ data, orderId, onBack }) {
         </h1>
 
         {/* preview slot */}
-        <div className="relative mt-9 rounded-[28px] border border-gold/35 bg-gradient-to-b from-[#1A1338] to-[#0E0A1F] p-8 shadow-[0_50px_100px_-50px_rgba(0,0,0,.9)]">
-          <StarField count={24} />
-          <div className="relative mx-auto max-w-[300px]">
-            <ZodiacWheel size={300} />
-          </div>
-          <p className="relative mt-5 font-sans text-[12.5px] uppercase tracking-[0.24em] text-gold/80">Превью твоего Паспорта</p>
+        <div className="relative mt-9 rounded-[28px] border border-gold/35 bg-gradient-to-b from-[#1A1338] to-[#0E0A1F] p-2 shadow-[0_50px_100px_-50px_rgba(0,0,0,.9)] overflow-hidden h-[450px]">
+          {orderId ? (
+            <iframe
+              src={`/api/orders/${orderId}/pdf#toolbar=0`}
+              className="w-full h-full border-none rounded-[20px]"
+              title="PDF Preview"
+            />
+          ) : (
+            <div className="flex items-center justify-center h-full text-lavmut font-sans">
+              Загрузка предпросмотра...
+            </div>
+          )}
+        </div>
+
+        <div className="mt-4">
+          <a
+            href={`/api/orders/${orderId}/pdf`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-sans text-[13.5px] text-gold hover:text-goldlt transition-colors underline decoration-gold/40 underline-offset-4 inline-flex items-center gap-1"
+          >
+            Открыть предпросмотр в новой вкладке <Icon name="external-link" className="text-[13px]" />
+          </a>
         </div>
 
         <div className="mt-8 flex justify-center">
