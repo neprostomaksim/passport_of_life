@@ -75,6 +75,44 @@ def _interpret_llm(facts: dict) -> dict:
     return json.loads(text)
 
 # ── Режим 2: детерминированные шаблоны (fallback, офлайн) ──
+PLANET_THEMES = {
+    "Юпитер": {
+        "theme": "Год расширения возможностей, социального признания и роста.",
+        "career": "Благоприятное время для расширения деятельности, новых должностей или начала обучения.",
+        "love": "Период эмоциональной открытости. Благоприятно для укрепления союза или новых знакомств.",
+        "health": "Энергетический подъем, однако важно избегать переедания и контролировать нагрузки.",
+        "advice": "Будьте открыты новым возможностям, но не берите на себя слишком много обязательств."
+    },
+    "Сатурн": {
+        "theme": "Год структурирования жизни, ответственности и проверки планов на прочность.",
+        "career": "Период дисциплины и упорного труда. Хорошее время для наведения порядка в делах.",
+        "love": "Время проверки отношений на зрелость. Благоприятно для осознанных совместных решений.",
+        "health": "Рекомендуется уделить внимание костной системе, суставам и избегать переутомления.",
+        "advice": "Наведите порядок в текущих делах, действуйте планомерно и без спешки."
+    },
+    "Уран": {
+        "theme": "Год неожиданных перемен, стремления к личной свободе и обновлению.",
+        "career": "Возможна смена направления, внедрение инноваций или переход к большей независимости в работе.",
+        "love": "Период турбулентности. Возможна жажда свободы или неожиданные яркие увлечения.",
+        "health": "Повышенная нервная возбудимость. Рекомендуется ограничить гаджеты и нормализовать сон.",
+        "advice": "Не бойтесь пробовать новые подходы, но сохраняйте связь с реальностью."
+    },
+    "Нептун": {
+        "theme": "Год усиления интуиции, творческого вдохновения и глубоких внутренних поисков.",
+        "career": "Благоприятный период для творческой работы и психологии. В коммерции важна бдительность.",
+        "love": "Время романтического вдохновения. Остерегайтесь избыточной идеализации партнера.",
+        "health": "Повышенная чувствительность организма. Полезны водные процедуры, йога и медитация.",
+        "advice": "Доверяйте внутреннему голосу и развивайте творческие таланты."
+    },
+    "Плутон": {
+        "theme": "Год глубокой внутренней трансформации, переоценки ценностей и раскрытия силы.",
+        "career": "Период перераспределения сил, закрытия старых проектов и реструктуризации дел.",
+        "love": "Глубокие эмоциональные переживания. Время освобождения от изживших себя связей.",
+        "health": "Хороший период для очищения организма, избавления от вредных привычек и регенерации.",
+        "advice": "Освобождайтесь от старого и ненужного, расчищая место для новых начинаний."
+    }
+}
+
 def _interpret_templates(data: ChartData, facts: dict) -> dict:
     sun = data.chart["sun"]; asc = data.meta["asc_sign"]
     mission = (f"{data.meta['name']} с Асцендентом в знаке {asc} и Солнцем в {sun['sign']} "
@@ -88,6 +126,46 @@ def _interpret_templates(data: ChartData, facts: dict) -> dict:
         return [{"ages":ag,"label":lb,"description":"Этап развития по 7-летнему циклу Сатурна."}
                 for ag, lb in zip(ages, labels)]
     base = ["Пробуждение","Поиск","Рост","Расцвет","Мастерство","Наследие"]
+
+    yearly_forecast = {}
+    for y in (2026, 2027, 2028):
+        y_transits = transits_for_year(data.subject, y)
+        
+        theme = "Год стабилизации и накопления внутренних ресурсов."
+        career_desc = "Спокойное развитие текущих проектов, хорошее время для укрепления профессионального фундамента."
+        love_desc = "Период эмоционального равновесия и укрепления близких связей."
+        health_desc = "Состояние здоровья стабильное, рекомендуется поддерживать баланс активности и отдыха."
+        advice = "Сохраняйте верность своим долгосрочным целям и действуйте планомерно."
+        best_months = ["Март", "Октябрь"]
+        challenging_months = ["Январь", "Июнь"]
+        
+        if y_transits:
+            prim = y_transits[0]
+            p_name = prim["transit_planet"]
+            aspect = prim["aspect"]
+            
+            if p_name in PLANET_THEMES:
+                theme = f"Транзит {p_name} — {PLANET_THEMES[p_name]['theme']}"
+                career_desc = PLANET_THEMES[p_name]["career"]
+                love_desc = PLANET_THEMES[p_name]["love"]
+                health_desc = PLANET_THEMES[p_name]["health"]
+                advice = PLANET_THEMES[p_name]["advice"]
+                
+                if aspect in ("квадратура", "оппозиция"):
+                    best_months = ["Май", "Ноябрь"]
+                    challenging_months = ["Февраль", "Август"]
+                else:
+                    best_months = ["Апрель", "Сентябрь"]
+                    challenging_months = ["Июль", "Декабрь"]
+                    
+        yearly_forecast[str(y)] = {
+            "theme": theme,
+            "career": {"description": career_desc, "best_months": best_months, "challenging_months": challenging_months},
+            "personal_life": {"description": love_desc, "best_months": best_months, "challenging_months": challenging_months},
+            "health": {"description": health_desc, "best_months": best_months, "challenging_months": challenging_months},
+            "advice": advice
+        }
+
     return {
         "life_mission": mission,
         "strengths": ["Самобытность","Глубина","Воля","Интуиция","Устойчивость"],
@@ -95,11 +173,7 @@ def _interpret_templates(data: ChartData, facts: dict) -> dict:
         "aspect_interpretations": aspect_interp,
         "life_periods": {k:{"score":7,"periods":cycles(base)}
                          for k in ("career","love","finance","health","spirituality")},
-        "yearly_forecast": {str(y):{"theme":"Год по ведущим транзитам",
-            "career":{"description":"На основе транзитов года.","best_months":[],"challenging_months":[]},
-            "personal_life":{"description":"...","best_months":[],"challenging_months":[]},
-            "health":{"description":"...","best_months":[],"challenging_months":[]},
-            "advice":"Совет на год."} for y in (2026,2027,2028)},
+        "yearly_forecast": yearly_forecast,
     }
 
 if __name__ == "__main__":

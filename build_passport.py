@@ -41,7 +41,16 @@ def build_passport(inp: ChartInput, use_ai: bool = True) -> dict:
     forecast = []
     for y in (2026, 2027, 2028):
         yt = texts["yearly_forecast"][str(y)]
-        ktr = [{"transit":t["label"],"influence":""} for t in transits_for_year(data.subject, y)]
+        ktr = []
+        for t in transits_for_year(data.subject, y):
+            aspect_type = t.get("aspect", "")
+            inf = "Гармоничное влияние, поддержка в делах."
+            if aspect_type in ("квадратура", "оппозиция"):
+                inf = "Напряженный аспект, требует собранности и осторожности."
+            elif aspect_type == "соединение":
+                inf = "Важное соединение, импульс к обновлению сферы."
+            ktr.append({"transit": t["label"], "influence": inf})
+
         forecast.append({"year":y,"theme":yt["theme"],"key_transits":ktr,
             "career":yt["career"],"personal_life":yt["personal_life"],
             "health":yt["health"],"advice":yt["advice"]})
