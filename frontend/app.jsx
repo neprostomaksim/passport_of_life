@@ -14,18 +14,73 @@ const STAGES = [
   'Готово.',
 ];
 
-function Progress({ name, onDone }) {
+function Progress({ name, orderId, initError, onDone, onError }) {
   const [pct, setPct] = useState(0);
+  const [serverStatus, setServerStatus] = useState('processing');
+  const [errorMessage, setErrorMessage] = useState('');
   const pctRef = useRef(0);
+  const statusRef = useRef('processing');
+
+  useEffect(() => {
+    statusRef.current = serverStatus;
+  }, [serverStatus]);
+
+  useEffect(() => {
+    if (initError) {
+      setServerStatus('fail');
+      setErrorMessage(initError);
+    }
+  }, [initError]);
+
+  useEffect(() => {
+    if (!orderId || initError) return;
+
+    let timerId;
+    const checkStatus = async () => {
+      try {
+        const res = await fetch(`/api/orders/${orderId}`);
+        if (!res.ok) throw new Error('Не удалось получить статус заказа');
+        const data = await res.json();
+
+        if (data.status === 'success') {
+          setServerStatus('success');
+          if (timerId) clearInterval(timerId);
+        } else if (data.status === 'fail') {
+          setServerStatus('fail');
+          setErrorMessage(data.error || 'Произошла ошибка при генерации документа.');
+          if (timerId) clearInterval(timerId);
+        }
+      } catch (err) {
+        console.error('Ошибка опроса статуса:', err);
+      }
+    };
+
+    timerId = setInterval(checkStatus, 2000);
+    checkStatus();
+
+    return () => {
+      if (timerId) clearInterval(timerId);
+    };
+  }, [orderId, initError]);
 
   useEffect(() => {
     const iv = setInterval(() => {
       let p = pctRef.current;
+      const currentStatus = statusRef.current;
+
+      if (currentStatus === 'fail') {
+        clearInterval(iv);
+        return;
+      }
+
       if (p < 100) {
-        const step = p < 75 ? 1.4 + Math.random() * 1.6 : 0.5 + Math.random() * 0.9;
-        p = Math.min(100, p + step);
-        pctRef.current = p;
-        setPct(p);
+        const maxPct = currentStatus === 'success' ? 100 : 99;
+        if (p < maxPct) {
+          const step = p < 75 ? 1.4 + Math.random() * 1.6 : 0.5 + Math.random() * 0.9;
+          p = Math.min(maxPct, p + step);
+          pctRef.current = p;
+          setPct(p);
+        }
       } else {
         clearInterval(iv);
         setTimeout(onDone, 900);
@@ -36,6 +91,28 @@ function Progress({ name, onDone }) {
 
   const stageIdx = Math.min(STAGES.length - 1, Math.floor((pct / 100) * (STAGES.length - 1) + 0.0001));
   const ring = 2 * Math.PI * 86;
+
+  if (serverStatus === 'fail') {
+    return (
+      <div className="cosmic-bg relative min-h-screen overflow-hidden flex items-center justify-center px-6">
+        <StarField count={110} />
+        <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[640px] w-[640px] rounded-full bg-[radial-gradient(circle,rgba(220,38,38,.12),transparent_62%)]"></div>
+
+        <div className="relative flex flex-col items-center text-center fade-up max-w-md">
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-red-500/40 bg-red-500/[.08] text-red-400 text-[30px] shadow-[0_0_40px_-8px_rgba(239,68,68,.6)]">
+            <Icon name="alert-triangle" />
+          </div>
+          <h2 className="font-serif text-[clamp(1.8rem,4vw,2.6rem)] text-lav">Произошла ошибка</h2>
+          <p className="mt-4 font-sans text-[15px] text-lavmut leading-relaxed">
+            {errorMessage || 'Не удалось сгенерировать Паспорт жизни. Пожалуйста, попробуйте снова.'}
+          </p>
+          <button onClick={onError} className="mt-8 gold-btn rounded-full px-8 py-3.5 font-sans font-semibold text-[#2A1C05]">
+            Вернуться назад
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="cosmic-bg relative min-h-screen overflow-hidden flex items-center justify-center px-6">
@@ -112,68 +189,20 @@ function getZodiacSign(dateStr) {
   return { name: 'Рыбы', symbol: '♓' };
 }
 
-function Result({ data, onBack }) {
+function Result({ data, orderId, onBack }) {
   const name = data?.name;
 
   const handleDownload = () => {
-    const zodiac = getZodiacSign(data?.bdate);
-    let eventsText = '';
-    if (data?.unknown && data?.events) {
-      eventsText = '\nВажные события жизненного пути:\n' + data.events
-        .filter(e => e.date || e.title)
-        .map((e, idx) => `${idx + 1}. [${e.date || 'Дата неизвестна'}] - ${e.title || 'Событие'}`)
-        .join('\n') + '\n';
+    if (!orderId) {
+      alert('Ошибка: идентификатор заказа не найден.');
+      return;
     }
-
-    const content = `===========================================================
-                      ПАСПОРТ ЖИЗНИ
-===========================================================
-Владелец: ${name?.toUpperCase() || 'ПУТЕШЕСТВЕННИК'}
-Дата расчета: ${new Date().toLocaleDateString('ru-RU')}
------------------------------------------------------------
-
-ДАННЫЕ РОЖДЕНИЯ И НАСТРОЙКИ КАРТЫ:
-- Имя: ${name || 'Не указано'}
-- Дата рождения: ${data?.bdate || 'Не указана'}
-- Время рождения: ${data?.unknown ? 'Неизвестно (расчет по событиям)' : (data?.btime || 'Не указано')}
-- Место рождения: ${data?.place || 'Не указано'}
-${data?.email ? `- Email: ${data?.email}\n` : ''}${eventsText}
-Знак зодиака: ${zodiac.name} (${zodiac.symbol})
-
-===========================================================
-РАЗДЕЛ 1: ЛИЧНОСТЬ И СУТЬ (Солнце в знаке ${zodiac.name})
-===========================================================
-Ваше солнце находится в знаке ${zodiac.name}. Это определяет ваше глубинное стремление к самовыражению и жизненную энергию. Вы обладаете врожденной способностью адаптироваться к изменениям и интуитивно находить выход из сложных ситуаций. Ваша истинная суть раскрывается тогда, когда вы следуете своему внутреннему компасу, а не внешним ожиданиям. В вас заложен сильный творческий потенциал и стремление к гармонии.
-
-===========================================================
-РАЗДЕЛ 2: ПУТЬ И ПРЕДНАЗНАЧЕНИЕ
-===========================================================
-Ваша жизненная траектория указывает на важность баланса между внутренним миром и социальными достижениями. Ваша сильная сторона — это аналитический склад ума в сочетании с глубокой эмпатией. 
-Предназначение состоит в том, чтобы трансформировать накопленный личный опыт в пользу для окружающих, создавая вокруг себя гармонию, стабильность и вдохновение. Звезды советуют доверять своей интуиции при выборе ключевых направлений развития.
-
-===========================================================
-РАЗДЕЛ 3: ЛЮБОВЬ И ОТНОШЕНИЯ
-===========================================================
-В отношениях для вас критически важны доверие, искренность и глубокая интеллектуальная связь. Вы ищете партнера, который разделяет ваши ценности и уважает ваше личное пространство. Ваша способность глубоко чувствовать эмоции других людей делает вас надежным, чутким и поддерживающим партнером, способным создавать уют и крепкие союзы.
-
-===========================================================
-РАЗДЕЛ 4: ЗОНЫ РОСТА И СКРЫТЫЕ СИЛЫ
-===========================================================
-- Скрытая сила: Высокая интуиция, устойчивость к кризисам и умение находить нестандартные решения в сложных ситуациях.
-- Зона роста: Умение делегировать задачи, снижать уровень контроля над внешними обстоятельствами и давать себе время на полноценный отдых.
-
------------------------------------------------------------
-Документ сгенерирован ИИ системы "Паспорт Жизни"
-Пусть звезды всегда освещают ваш путь!
-===========================================================`;
-
-    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.href = url;
-    link.download = `Passport_of_Life_${name || 'User'}.txt`;
+    link.href = `/api/orders/${orderId}/pdf`;
+    link.download = `Passport_of_Life_${name || 'User'}.pdf`;
+    document.body.appendChild(link);
     link.click();
-    URL.revokeObjectURL(url);
+    document.body.removeChild(link);
   };
 
   return (
@@ -218,6 +247,8 @@ ${data?.email ? `- Email: ${data?.email}\n` : ''}${eventsText}
 function App() {
   const [screen, setScreen] = useState('landing'); // landing | progress | result
   const [data, setData] = useState(null);
+  const [orderId, setOrderId] = useState(null);
+  const [error, setError] = useState(null);
 
   // refresh lucide icons after every render
   useEffect(() => {
@@ -227,15 +258,57 @@ function App() {
   // scroll to top on screen change
   useEffect(() => { window.scrollTo(0, 0); }, [screen]);
 
-  const start = (formData) => { setData(formData); setScreen('progress'); };
+  const start = async (formData) => {
+    setData(formData);
+    setScreen('progress');
+    setOrderId(null);
+    setError(null);
+
+    try {
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!res.ok) {
+        throw new Error('Не удалось отправить форму на сервер. Пожалуйста, попробуйте ещё раз.');
+      }
+
+      const result = await res.json();
+      if (!result.orderId) {
+        throw new Error('Неверный ответ сервера (отсутствует ID заказа).');
+      }
+      setOrderId(result.orderId);
+    } catch (err) {
+      console.error(err);
+      setError(err.message || 'Ошибка сети при обращении к серверу.');
+    }
+  };
+
   const finish = () => setScreen('result');
-  const reset = () => { setScreen('landing'); setData(null); };
+  const reset = () => {
+    setScreen('landing');
+    setData(null);
+    setOrderId(null);
+    setError(null);
+  };
 
   return (
     <div key={screen}>
       {screen === 'landing' && <Landing onStart={start} />}
-      {screen === 'progress' && <Progress name={data?.name} onDone={finish} />}
-      {screen === 'result' && <Result data={data} onBack={reset} />}
+      {screen === 'progress' && (
+        <Progress
+          name={data?.name}
+          orderId={orderId}
+          initError={error}
+          onDone={finish}
+          onError={reset}
+        />
+      )}
+      {screen === 'result' && <Result data={data} orderId={orderId} onBack={reset} />}
     </div>
   );
 }

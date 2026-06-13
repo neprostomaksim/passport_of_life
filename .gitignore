@@ -17,3 +17,6 @@ node_modules/
 
 # ── Сгенерированные PDF ───────────────
 rb-backend/output/
+
+# ── База данных SQLite ────────────────
+rb-backend/data/

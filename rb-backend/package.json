@@ -8,8 +8,11 @@
     "dev": "node server.js"
   },
   "dependencies": {
-    "express": "^4.21.0",
+    "better-sqlite3": "^12.10.0",
+    "cors": "^2.8.5",
     "dotenv": "^16.4.0",
-    "cors": "^2.8.5"
+    "express": "^4.21.0",
+    "puppeteer": "^25.1.0",
+    "uuid": "^14.0.0"
   }
 }
