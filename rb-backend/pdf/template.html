@@ -961,7 +961,7 @@ function renderForecastPage(d) {
   </div>`).join('');
 
   // rectification block
-  const rect = d.rectification;
+  const rect = d.rectification || { needed: false, original_time: '—', final_time: '—', correction_minutes: 0, confidence: '—', explanation: '—', events_analysis: [] };
   const evRows = (rect.events_analysis||[]).map(e=>`
   <div class="rect-event-row">
     <span class="re-phase">${e.phase}</span>
