@@ -19,23 +19,31 @@ db.pragma('journal_mode = WAL');
 // ── Создаём таблицу orders ────────────────────────────────────
 db.exec(`
   CREATE TABLE IF NOT EXISTS orders (
-    id          TEXT PRIMARY KEY,
-    form_data   TEXT NOT NULL,
-    status      TEXT NOT NULL DEFAULT 'processing',
-    passport_json TEXT,
-    pdf_path    TEXT,
-    error       TEXT,
-    created_at  TEXT NOT NULL DEFAULT (datetime('now')),
-    updated_at  TEXT NOT NULL DEFAULT (datetime('now'))
+    id             TEXT PRIMARY KEY,
+    form_data      TEXT NOT NULL,
+    status         TEXT NOT NULL DEFAULT 'pending_payment',
+    payment_status TEXT NOT NULL DEFAULT 'pending',
+    passport_json  TEXT,
+    pdf_path       TEXT,
+    error          TEXT,
+    created_at     TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at     TEXT NOT NULL DEFAULT (datetime('now'))
   )
 `);
+
+// Миграция: добавляем колонку payment_status в существующие БД, если её там нет
+try {
+  db.exec("ALTER TABLE orders ADD COLUMN payment_status TEXT NOT NULL DEFAULT 'pending'");
+} catch (e) {
+  // Игнорируем ошибку, если колонка уже существует
+}
 
 // ── Подготовленные запросы (работают быстрее) ─────────────────
 
 const stmts = {
   insert: db.prepare(`
-    INSERT INTO orders (id, form_data, status)
-    VALUES (@id, @form_data, 'processing')
+    INSERT INTO orders (id, form_data, status, payment_status)
+    VALUES (@id, @form_data, 'pending_payment', 'pending')
   `),
 
   getById: db.prepare(`
@@ -57,6 +65,23 @@ const stmts = {
         error = @error,
         updated_at = datetime('now')
     WHERE id = @id
+  `),
+
+  updatePaid: db.prepare(`
+    UPDATE orders
+    SET payment_status = 'paid',
+        status = 'processing',
+        updated_at = datetime('now')
+    WHERE id = ?
+  `),
+
+  updatePaymentFailed: db.prepare(`
+    UPDATE orders
+    SET payment_status = 'failed',
+        status = 'fail',
+        error = ?,
+        updated_at = datetime('now')
+    WHERE id = ?
   `),
 };
 
@@ -87,4 +112,14 @@ function markFail(id, errorText) {
   stmts.updateFail.run({ id, error: errorText });
 }
 
-module.exports = { createOrder, getOrder, markSuccess, markFail };
+/** Пометить заказ как оплаченный. */
+function markPaid(id) {
+  stmts.updatePaid.run(id);
+}
+
+/** Пометить платеж как неудачный. */
+function markPaymentFailed(id, errorText) {
+  stmts.updatePaymentFailed.run(errorText, id);
+}
+
+module.exports = { createOrder, getOrder, markSuccess, markFail, markPaid, markPaymentFailed };

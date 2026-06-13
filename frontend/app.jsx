@@ -18,8 +18,10 @@ function Progress({ name, orderId, initError, onDone, onError }) {
   const [pct, setPct] = useState(0);
   const [serverStatus, setServerStatus] = useState('processing');
   const [errorMessage, setErrorMessage] = useState('');
+  const [userName, setUserName] = useState(name || '');
   const pctRef = useRef(0);
   const statusRef = useRef('processing');
+  const orderDataRef = useRef(null);
 
   useEffect(() => {
     statusRef.current = serverStatus;
@@ -42,13 +44,22 @@ function Progress({ name, orderId, initError, onDone, onError }) {
         if (!res.ok) throw new Error('Не удалось получить статус заказа');
         const data = await res.json();
 
+        if (data.name) {
+          setUserName(data.name);
+        }
+
         if (data.status === 'success') {
           setServerStatus('success');
+          orderDataRef.current = data;
           if (timerId) clearInterval(timerId);
         } else if (data.status === 'fail') {
           setServerStatus('fail');
           setErrorMessage(data.error || 'Произошла ошибка при генерации документа.');
           if (timerId) clearInterval(timerId);
+        } else if (data.status === 'pending_payment') {
+          setServerStatus('pending_payment');
+        } else if (data.status === 'processing') {
+          setServerStatus('processing');
         }
       } catch (err) {
         console.error('Ошибка опроса статуса:', err);
@@ -68,8 +79,7 @@ function Progress({ name, orderId, initError, onDone, onError }) {
       let p = pctRef.current;
       const currentStatus = statusRef.current;
 
-      if (currentStatus === 'fail') {
-        clearInterval(iv);
+      if (currentStatus === 'fail' || currentStatus === 'pending_payment') {
         return;
       }
 
@@ -83,7 +93,7 @@ function Progress({ name, orderId, initError, onDone, onError }) {
         }
       } else {
         clearInterval(iv);
-        setTimeout(onDone, 900);
+        setTimeout(() => onDone(orderDataRef.current), 900);
       }
     }, 45);
     return () => clearInterval(iv);
@@ -91,6 +101,10 @@ function Progress({ name, orderId, initError, onDone, onError }) {
 
   const stageIdx = Math.min(STAGES.length - 1, Math.floor((pct / 100) * (STAGES.length - 1) + 0.0001));
   const ring = 2 * Math.PI * 86;
+
+  const displayStage = serverStatus === 'pending_payment' 
+    ? 'Ожидаем подтверждения оплаты...' 
+    : STAGES[stageIdx];
 
   if (serverStatus === 'fail') {
     return (
@@ -150,7 +164,7 @@ function Progress({ name, orderId, initError, onDone, onError }) {
         </div>
 
         <h2 className="mt-12 font-serif text-[clamp(1.8rem,4vw,2.6rem)] text-lav">
-          Создаём <span className="gold-text italic">Паспорт</span>{name ? <>, {name}</> : ''}
+          Создаём <span className="gold-text italic">Паспорт</span>{userName ? <>, {userName}</> : ''}
         </h2>
 
         {/* linear bar */}
@@ -160,7 +174,7 @@ function Progress({ name, orderId, initError, onDone, onError }) {
         </div>
 
         <div className="mt-6 h-6 font-sans text-[15px] tracking-wide text-lavmut">
-          <span key={stageIdx} className="fade-up inline-block">{STAGES[stageIdx]}</span>
+          <span key={displayStage} className="fade-up inline-block">{displayStage}</span>
         </div>
       </div>
     </div>
@@ -255,6 +269,7 @@ function App() {
   const [data, setData] = useState(null);
   const [orderId, setOrderId] = useState(null);
   const [error, setError] = useState(null);
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   // refresh lucide icons after every render
   useEffect(() => {
@@ -264,11 +279,30 @@ function App() {
   // scroll to top on screen change
   useEffect(() => { window.scrollTo(0, 0); }, [screen]);
 
+  // Handle URL payment status params on mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const paymentStatus = params.get('payment_status');
+    const orderIdParam = params.get('order_id');
+
+    if (orderIdParam) {
+      if (paymentStatus === 'success') {
+        setOrderId(orderIdParam);
+        setScreen('progress');
+      } else if (paymentStatus === 'decline' || paymentStatus === 'fail') {
+        setError('Платеж был отклонен или произошла ошибка при оплате. Пожалуйста, попробуйте снова.');
+      }
+      
+      // Clean query parameters from URL without reloading page
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState({}, document.title, cleanUrl);
+    }
+  }, []);
+
   const start = async (formData) => {
     setData(formData);
-    setScreen('progress');
-    setOrderId(null);
     setError(null);
+    setIsRedirecting(true);
 
     try {
       const res = await fetch('/api/orders', {
@@ -284,27 +318,51 @@ function App() {
       }
 
       const result = await res.json();
-      if (!result.orderId) {
-        throw new Error('Неверный ответ сервера (отсутствует ID заказа).');
+      if (!result.orderId || !result.paymentUrl) {
+        throw new Error('Неверный ответ сервера (отсутствует ID заказа или ссылка на оплату).');
       }
-      setOrderId(result.orderId);
+
+      // Redirect user to the payment link
+      window.location.href = result.paymentUrl;
     } catch (err) {
       console.error(err);
       setError(err.message || 'Ошибка сети при обращении к серверу.');
+      setIsRedirecting(false);
     }
   };
 
-  const finish = () => setScreen('result');
+  const finish = (orderData) => {
+    if (orderData && orderData.name) {
+      setData({ name: orderData.name });
+    }
+    setScreen('result');
+  };
+
   const reset = () => {
     setScreen('landing');
     setData(null);
     setOrderId(null);
     setError(null);
+    setIsRedirecting(false);
   };
 
   return (
     <div key={screen}>
-      {screen === 'landing' && <Landing onStart={start} />}
+      {isRedirecting && (
+        <div className="cosmic-bg fixed inset-0 z-50 overflow-hidden flex items-center justify-center px-6">
+          <StarField count={110} />
+          <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[640px] w-[640px] rounded-full bg-[radial-gradient(circle,rgba(124,82,200,.25),transparent_62%)]"></div>
+          <div className="relative flex flex-col items-center text-center fade-up">
+            <div className="relative h-16 w-16 mb-8">
+              <div className="absolute inset-0 rounded-full border-2 border-gold/20"></div>
+              <div className="absolute inset-0 rounded-full border-2 border-gold border-t-transparent animate-spin"></div>
+            </div>
+            <h2 className="font-serif text-[24px] text-lav">Подготовка к оплате...</h2>
+            <p className="mt-3 font-sans text-[14px] text-lavmut">Перенаправляем на защищенный платежный шлюз BePaid</p>
+          </div>
+        </div>
+      )}
+      {screen === 'landing' && <Landing onStart={start} error={error} />}
       {screen === 'progress' && (
         <Progress
           name={data?.name}

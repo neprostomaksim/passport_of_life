@@ -251,7 +251,7 @@ function FormField({ label, hint, children, error }) {
   );
 }
 
-function Hero({ onStart }) {
+function Hero({ onStart, error }) {
   const [name, setName] = useStateL('');
   const [email, setEmail] = useStateL('');
   const [bdate, setBdate] = useStateL('');
@@ -311,6 +311,13 @@ function Hero({ onStart }) {
             <h2 className="font-serif text-[26px] sm:text-[29px] text-lav">Создай свой <span className="gold-text">Паспорт жизни</span></h2>
             <p className="mt-1.5 font-sans text-[13.5px] text-lavmut">Один документ — вся твоя история</p>
           </div>
+
+          {error && (
+            <div className="mt-5 flex items-start gap-2.5 rounded-xl border border-red-500/30 bg-red-500/[.07] p-3 text-left text-[14px] text-red-400">
+              <Icon name="alert-circle" className="mt-0.5 text-[16px] shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
 
           <div className="mt-7 flex flex-col gap-4">
             <FormField label="Имя" error={err.name}>
@@ -657,7 +664,7 @@ function Footer() {
 /* ════════════════════════════════════════════════════════════
    LANDING
    ════════════════════════════════════════════════════════════ */
-function Landing({ onStart }) {
+function Landing({ onStart, error }) {
   const scrollToForm = () => {
     const f = document.getElementById('top');
     if (f) window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -665,7 +672,7 @@ function Landing({ onStart }) {
   return (
     <div className="cosmic-bg min-h-screen">
       <Header onCta={scrollToForm} />
-      <Hero onStart={onStart} />
+      <Hero onStart={onStart} error={error} />
       <Discover />
       <How />
       <Included />
