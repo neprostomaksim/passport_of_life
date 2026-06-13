@@ -1002,11 +1002,47 @@ function renderForecastPage(d) {
 }
 
 /* ── MOUNT ── */
-document.getElementById('root').innerHTML =
-  renderCover(DATA) +
-  renderChartPage(DATA) +
-  renderPeriodsPage(DATA) +
-  renderForecastPage(DATA);
+const urlParams = new URLSearchParams(window.location.search);
+const isPreview = urlParams.get('preview') === '1';
+
+if (isPreview) {
+  // Отображаем только обложку для превью
+  document.getElementById('root').innerHTML = renderCover(DATA);
+  
+  // Применяем стили превью-режима
+  document.body.style.padding = '0';
+  document.body.style.margin = '0';
+  document.body.style.background = 'transparent';
+  document.documentElement.style.background = 'transparent';
+  
+  const printBar = document.querySelector('.no-print');
+  if (printBar) printBar.style.display = 'none';
+
+  // Функция авто-масштабирования страницы под размер фрейма
+  const scalePage = () => {
+    const pageEl = document.querySelector('.page');
+    if (!pageEl) return;
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const scale = Math.min(w / 794, h / 1122);
+    pageEl.style.transform = `scale(${scale})`;
+    pageEl.style.transformOrigin = 'top center';
+    pageEl.style.margin = '0 auto';
+    pageEl.style.boxShadow = 'none';
+  };
+
+  window.addEventListener('resize', scalePage);
+  window.addEventListener('load', scalePage);
+  scalePage();
+  setTimeout(scalePage, 50);
+  setTimeout(scalePage, 200);
+} else {
+  document.getElementById('root').innerHTML =
+    renderCover(DATA) +
+    renderChartPage(DATA) +
+    renderPeriodsPage(DATA) +
+    renderForecastPage(DATA);
+}
 </script>
 </body>
 </html>

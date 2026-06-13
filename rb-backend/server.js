@@ -12,7 +12,7 @@ const cors    = require('cors');
 const { v4: uuidv4 } = require('uuid');
 const db = require('./db');
 const { generateStubPassport } = require('./stub');
-const { generatePDF } = require('./pdf/generate');
+const { generatePDF, getCustomizedHTML } = require('./pdf/generate');
 
 // Загружаем секреты/настройки из .env
 require('dotenv').config();
@@ -123,6 +123,26 @@ app.get('/api/orders/:id/pdf', (req, res) => {
   } catch (error) {
     console.error('Failed to download PDF:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * Получить превью-страницу натальной карты (HTML)
+ */
+app.get('/api/orders/:id/preview', (req, res) => {
+  try {
+    const order = db.getOrder(req.params.id);
+    if (!order) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    const formData = JSON.parse(order.form_data);
+    const html = getCustomizedHTML(formData);
+
+    res.send(html);
+  } catch (error) {
+    console.error('Failed to get preview:', error);
+    res.status(500).send('Internal server error');
   }
 });
 

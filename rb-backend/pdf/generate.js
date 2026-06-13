@@ -15,15 +15,11 @@ const OUTPUT_DIR    = path.join(__dirname, '..', 'output');
 fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
 /**
- * Генерирует PDF из натальной карты на основе шаблона.
- * @param {string} orderId
- * @param {object} _passportJson — (не используется, оставлен для совместимости сигнатуры)
- * @param {object} formData — данные формы (name, bdate, btime, place, unknown)
- * @returns {Promise<string>} — абсолютный путь к PDF-файлу
+ * Возвращает кастомизированный HTML-шаблон на основе данных формы.
+ * @param {object} formData
+ * @returns {string} — готовый HTML
  */
-async function generatePDF(orderId, _passportJson, formData) {
-  const puppeteer = require('puppeteer');
-
+function getCustomizedHTML(formData) {
   // Глубокое копирование базовой структуры
   const data = JSON.parse(JSON.stringify(BASE_DATA));
 
@@ -93,7 +89,20 @@ async function generatePDF(orderId, _passportJson, formData) {
   let html = fs.readFileSync(TEMPLATE_PATH, 'utf-8');
 
   // Вшиваем сериализованный объект DATA в скрипт страницы
-  html = html.replace('{{DATA_JSON}}', JSON.stringify(data, null, 2));
+  return html.replace('{{DATA_JSON}}', JSON.stringify(data, null, 2));
+}
+
+/**
+ * Генерирует PDF из натальной карты на основе шаблона.
+ * @param {string} orderId
+ * @param {object} _passportJson — (не используется)
+ * @param {object} formData — данные формы
+ * @returns {Promise<string>} — абсолютный путь к PDF-файлу
+ */
+async function generatePDF(orderId, _passportJson, formData) {
+  const puppeteer = require('puppeteer');
+
+  const html = getCustomizedHTML(formData);
 
   // Рендерим PDF через Puppeteer
   const browser = await puppeteer.launch({
@@ -107,7 +116,7 @@ async function generatePDF(orderId, _passportJson, formData) {
 
     const pdfPath = path.join(OUTPUT_DIR, `passport_${orderId}.pdf`);
 
-    // Генерируем А4 с нулевыми полями, чтобы кремовый фон страницы заполнил лист полностью
+    // Генерируем А4 с нулевыми полями
     await page.pdf({
       path: pdfPath,
       format: 'A4',
@@ -173,4 +182,4 @@ function getZodiacInPrepositional(sign) {
   return mapping[sign] || sign;
 }
 
-module.exports = { generatePDF };
+module.exports = { generatePDF, getCustomizedHTML };
