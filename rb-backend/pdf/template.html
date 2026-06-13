@@ -206,8 +206,8 @@ body {
   letter-spacing: .3em;
   text-transform: uppercase;
   color: var(--gold);
-  margin-bottom: 14px;
-  margin-top: 32px;
+  margin-bottom: 10px;
+  margin-top: 22px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -246,7 +246,7 @@ body {
 .planet-table tbody tr.highlight { background: var(--gold-pale); }
 
 .planet-table td {
-  padding: 9px 10px;
+  padding: 6px 10px;
   vertical-align: middle;
 }
 
@@ -290,7 +290,7 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 9px 12px;
+  padding: 6px 12px;
   border-radius: 3px;
   font-size: 13px;
 }
@@ -508,8 +508,8 @@ body {
 
 /* ─── FORECAST ─────────────────────────────────────────────── */
 .year-section {
-  margin-bottom: 28px;
-  padding-bottom: 24px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
   border-bottom: .5px solid var(--cream-dark);
 }
 .year-section:last-child { border-bottom: none; margin-bottom: 0; }
@@ -518,12 +518,12 @@ body {
   display: flex;
   align-items: baseline;
   gap: 16px;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .year-num {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 42px;
+  font-size: 36px;
   font-weight: 300;
   color: var(--gold);
   line-height: 1;
@@ -541,13 +541,13 @@ body {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .forecast-card {
   border: .5px solid var(--cream-dark);
   border-radius: 3px;
-  padding: 10px 12px;
+  padding: 8px 10px;
   background: white;
 }
 
@@ -615,13 +615,12 @@ body {
 .advice-box {
   background: var(--accent-pale);
   border-radius: 3px;
-  padding: 10px 14px;
-  font-size: 12px;
+  padding: 6px 12px;
   color: var(--accent);
   font-style: italic;
   font-family: 'Cormorant Garamond', serif;
-  font-size: 15px;
-  line-height: 1.6;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 /* ─── RECTIFICATION ────────────────────────────────────────── */
@@ -851,11 +850,31 @@ function renderChartPage(d) {
       </tbody>
     </table>
 
-    <div class="section-label">Ключевые аспекты</div>
-    <div class="aspects-grid">${aspectRows}</div>
-
     <div class="section-label">Жизненное предназначение</div>
     <div class="mission-box">${d.life_mission}</div>
+
+    <div class="tz-note">Часовой пояс: ${d.meta.timezone_note}</div>
+  </div>`, 2, 6);
+}
+
+function renderAspectsPage(d) {
+  const aspectRows = d.key_aspects.map(a => `
+  <div class="aspect-row">
+    <span class="aspect-tag ${ASPECT_TAGS[a.type]||'tag-conj'}">${a.type}</span>
+    <span class="aspect-planets">${a.planets}</span>
+    <span class="aspect-desc">${a.interpretation}</span>
+    <span class="aspect-orb">орб ${a.orb}</span>
+  </div>`).join('');
+
+  return page(`
+  <div class="inner">
+    <div class="page-header">
+      <span class="page-header-title">Аспекты и Личность</span>
+      <span class="page-num">${d.meta.name} · Аспектные связи</span>
+    </div>
+
+    <div class="section-label">Ключевые аспекты</div>
+    <div class="aspects-grid">${aspectRows}</div>
 
     <div class="section-label">Профиль личности</div>
     <div class="two-col">
@@ -872,9 +891,7 @@ function renderChartPage(d) {
         </ul>
       </div>
     </div>
-
-    <div class="tz-note">Часовой пояс: ${d.meta.timezone_note}</div>
-  </div>`, 2, 4);
+  </div>`, 3, 6);
 }
 
 function renderPeriodsPage(d) {
@@ -911,7 +928,7 @@ function renderPeriodsPage(d) {
     </div>
     ${domainsHtml}
     <div class="tz-note" style="margin-top:12px">Периоды рассчитаны на основе вторичных прогрессий и транзитов Сатурна и Юпитера · Выделен текущий цикл</div>
-  </div>`, 3, 4);
+  </div>`, 4, 6);
 }
 
 function renderForecastPage(d) {
@@ -949,6 +966,19 @@ function renderForecastPage(d) {
     </div>`;
   }).join('');
 
+  return page(`
+  <div class="inner">
+    <div class="page-header">
+      <span class="page-header-title">Прогноз на 3 года</span>
+      <span class="page-num">${d.meta.name} · 2026–2028</span>
+    </div>
+
+    <div class="section-label">Прогноз на 3 года</div>
+    ${years}
+  </div>`, 5, 6);
+}
+
+function renderRectificationPage(d) {
   // key events timeline
   const tlItems = (d.key_events||[]).map(e=>`
   <div class="tl-item">
@@ -973,16 +1003,13 @@ function renderForecastPage(d) {
   return page(`
   <div class="inner">
     <div class="page-header">
-      <span class="page-header-title">Прогноз · Ректификация</span>
-      <span class="page-num">${d.meta.name} · 2026–2028</span>
+      <span class="page-header-title">События и Ректификация</span>
+      <span class="page-num">${d.meta.name} · Уточнение времени</span>
     </div>
 
     ${tlItems ? `
     <div class="section-label">Ключевые события</div>
     <div class="timeline">${tlItems}</div>` : ''}
-
-    <div class="section-label">Прогноз на 3 года</div>
-    ${years}
 
     <div class="section-label">Ректификация времени рождения</div>
     <div class="rect-box">
@@ -998,7 +1025,7 @@ function renderForecastPage(d) {
       <div class="rect-note">${rect.explanation}</div>
       <div class="rect-events">${evRows}</div>
     </div>
-  </div>`, 4, 4);
+  </div>`, 6, 6);
 }
 
 /* ── MOUNT ── */
@@ -1045,8 +1072,10 @@ if (isPreview) {
   document.getElementById('root').innerHTML =
     renderCover(DATA) +
     renderChartPage(DATA) +
+    renderAspectsPage(DATA) +
     renderPeriodsPage(DATA) +
-    renderForecastPage(DATA);
+    renderForecastPage(DATA) +
+    renderRectificationPage(DATA);
 }
 </script>
 </body>
