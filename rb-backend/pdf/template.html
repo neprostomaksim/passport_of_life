@@ -1008,13 +1008,14 @@ const isPreview = urlParams.get('preview') === '1';
 if (isPreview) {
   // Отображаем только обложку для превью
   document.getElementById('root').innerHTML = renderCover(DATA);
-  
   // Применяем стили превью-режима
   document.body.style.padding = '0';
   document.body.style.margin = '0';
   document.body.style.background = 'transparent';
   document.documentElement.style.background = 'transparent';
-  
+  document.body.style.overflow = 'hidden';
+  document.documentElement.style.overflow = 'hidden';
+
   const printBar = document.querySelector('.no-print');
   if (printBar) printBar.style.display = 'none';
 
@@ -1024,11 +1025,15 @@ if (isPreview) {
     if (!pageEl) return;
     const w = window.innerWidth;
     const h = window.innerHeight;
-    const scale = Math.min(w / 794, h / 1122);
-    pageEl.style.transform = `scale(${scale})`;
-    pageEl.style.transformOrigin = 'top center';
-    pageEl.style.margin = '0 auto';
-    pageEl.style.boxShadow = 'none';
+    const scale = Math.min(w / 794, h / 1122) * 0.95;
+    pageEl.style.position = 'absolute';
+    pageEl.style.left = '50%';
+    pageEl.style.top = '50%';
+    pageEl.style.transform = `translate(-50%, -50%) scale(${scale})`;
+    pageEl.style.transformOrigin = 'center center';
+    pageEl.style.margin = '0';
+    pageEl.style.boxShadow = '0 12px 36px rgba(0,0,0,0.3)';
+    pageEl.style.borderRadius = '6px';
   };
 
   window.addEventListener('resize', scalePage);
