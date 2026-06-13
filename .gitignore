@@ -20,3 +20,9 @@ rb-backend/output/
 
 # ── База данных SQLite ────────────────
 rb-backend/data/
+
+# ── Виртуальные окружения Python ──────
+.venv/
+
+# ── Бэкапы ────────────────────────────
+backup-stage4/

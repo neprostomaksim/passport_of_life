@@ -11,7 +11,6 @@ const cors    = require('cors');
 
 const { v4: uuidv4 } = require('uuid');
 const db = require('./db');
-const { generateStubPassport } = require('./stub');
 const { generatePDF, getCustomizedHTML } = require('./pdf/generate');
 
 // Загружаем секреты/настройки из .env
@@ -235,18 +234,59 @@ app.get('/api/payments/mock-checkout-page', (req, res) => {
 });
 
 /**
+ * Преобразует поля формы и форматирует даты под требования Python-движка.
+ */
+function formatDataForPython(formData) {
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '';
+    const parts = dateStr.split('-');
+    if (parts.length === 3) {
+      return `${parts[2]}.${parts[1]}.${parts[0]}`; // YYYY-MM-DD -> DD.MM.YYYY
+    }
+    return dateStr;
+  };
+
+  const events = (formData.events || [])
+    .filter(e => e.date && e.title)
+    .map(e => ({
+      date: formatDate(e.date),
+      label: e.title
+    }));
+
+  return {
+    name: formData.name,
+    dob: formatDate(formData.bdate),
+    pob: formData.place,
+    tob: formData.unknown ? null : (formData.btime || null),
+    time_unknown: !!formData.unknown,
+    email: formData.email || null,
+    events: events,
+    use_ai: process.env.PASSPORT_USE_AI === 'true'
+  };
+}
+
+/**
  * Вспомогательная фоновая функция генерации натальной карты после оплаты
  */
 function runBackgroundProcessing(orderId, formData) {
   (async () => {
     try {
-      // Имитация 5 секунд задержки расчетов
-      await new Promise(resolve => setTimeout(resolve, 5000));
+      console.log(`[Processing] Starting calculations for order ${orderId}...`);
 
-      const stub = generateStubPassport(orderId, formData);
-      const pdfPath = await generatePDF(orderId, stub.passport, formData);
+      const response = await fetch('http://127.0.0.1:8000/api/passport', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formatDataForPython(formData))
+      });
 
-      db.markSuccess(orderId, stub.passport, pdfPath);
+      if (!response.ok) {
+        throw new Error(`Python engine error: ${await response.text()}`);
+      }
+
+      const passportJson = await response.json();
+      const pdfPath = await generatePDF(orderId, passportJson);
+
+      db.markSuccess(orderId, passportJson, pdfPath);
       console.log(`[Success] Order ${orderId} generated successfully after payment.`);
     } catch (err) {
       console.error(`[Error] Failed to process paid order ${orderId}:`, err);
@@ -386,16 +426,31 @@ app.get('/api/orders/:id/pdf', (req, res) => {
 /**
  * Получить превью-страницу натальной карты (HTML)
  */
-app.get('/api/orders/:id/preview', (req, res) => {
+app.get('/api/orders/:id/preview', async (req, res) => {
   try {
     const order = db.getOrder(req.params.id);
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });
     }
 
-    const formData = JSON.parse(order.form_data);
-    const html = getCustomizedHTML(formData);
+    let passportJson;
+    if (order.passport_json) {
+      passportJson = JSON.parse(order.passport_json);
+    } else {
+      // Расчитываем на лету, если заказ еще не оплачен / не сгенерирован
+      const formData = JSON.parse(order.form_data);
+      const response = await fetch('http://127.0.0.1:8000/api/passport', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formatDataForPython(formData))
+      });
+      if (!response.ok) {
+        throw new Error(`Python engine preview error: ${await response.text()}`);
+      }
+      passportJson = await response.json();
+    }
 
+    const html = getCustomizedHTML(passportJson);
     res.send(html);
   } catch (error) {
     console.error('Failed to get preview:', error);
@@ -413,4 +468,28 @@ app.listen(PORT, () => {
   console.log(`\n🚀  Бэкенд РБ запущен: http://localhost:${PORT}`);
   console.log(`    Лендинг:  http://localhost:${PORT}/`);
   console.log(`    Health:   http://localhost:${PORT}/health\n`);
+});
+
+// ── Автозапуск Python-микросервиса ──────────────────────────────
+const { spawn } = require('child_process');
+const pyPath = path.join(__dirname, '..', '.venv', 'bin', 'python');
+const pyCmd = fs.existsSync(pyPath) ? pyPath : 'python3';
+const pyArgs = ['-m', 'uvicorn', 'api:app', '--host', '127.0.0.1', '--port', '8000'];
+
+console.log(`Starting Python calculation service using: ${pyCmd} ${pyArgs.join(' ')}`);
+const pyProcess = spawn(pyCmd, pyArgs, {
+  cwd: path.join(__dirname, '..')
+});
+
+pyProcess.stdout.on('data', (data) => {
+  console.log(`[Python] ${data.toString().trim()}`);
+});
+
+pyProcess.stderr.on('data', (data) => {
+  console.error(`[Python stderr] ${data.toString().trim()}`);
+});
+
+process.on('exit', () => {
+  console.log('Stopping Python calculation service...');
+  pyProcess.kill();
 });
