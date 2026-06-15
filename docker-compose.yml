@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: passport-of-life
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - BEPAID_SHOP_ID=test_shop_id
+      - BEPAID_SECRET_KEY=test_secret_key
+      - BEPAID_AMOUNT=2900
+      - PUBLIC_URL=http://localhost:3000
+      - PASSPORT_USE_AI=false
+    volumes:
+      # Сохраняем базу данных SQLite на сервере, чтобы она не стиралась при перезапуске
+      - ./rb-backend/data:/app/rb-backend/data
+      # Сохраняем сгенерированные PDF-файлы на сервере
+      - ./rb-backend/output:/app/rb-backend/output
