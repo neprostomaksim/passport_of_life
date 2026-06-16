@@ -1,0 +1,2772 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Паспорт Жизни</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Georgia', serif;
+      background: #0d0d1a;
+      color: #e8e0d0;
+      min-height: 100vh;
+    }
+
+    .stars {
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 20% 30%, rgba(80,40,120,0.3) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 70%, rgba(40,60,120,0.3) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    header .glyph {
+      font-size: 48px;
+      margin-bottom: 12px;
+      opacity: 0.85;
+    }
+
+    header h1 {
+      font-size: 28px;
+      font-weight: normal;
+      letter-spacing: 0.08em;
+      color: #d4b896;
+    }
+
+    header p {
+      margin-top: 8px;
+      font-size: 14px;
+      color: #8a7f72;
+      font-style: italic;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 36px;
+      backdrop-filter: blur(10px);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-group.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #9b8e80;
+    }
+
+    input, select {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px;
+      padding: 12px 14px;
+      color: #e8e0d0;
+      font-size: 15px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, select:focus {
+      border-color: rgba(180,140,100,0.5);
+    }
+
+    input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+      filter: invert(0.7);
+      cursor: pointer;
+    }
+
+    select option {
+      background: #1a1a2e;
+    }
+
+    .provider-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .provider-btn {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04);
+      color: #9b8e80;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .provider-btn.active {
+      border-color: #c4956a;
+      background: rgba(196,149,106,0.12);
+      color: #d4b896;
+    }
+
+    .submit-btn {
+      width: 100%;
+      margin-top: 28px;
+      padding: 16px;
+      background: linear-gradient(135deg, #8b5e3c, #c4956a);
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 16px;
+      font-family: inherit;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    .submit-btn:hover { opacity: 0.9; }
+    .submit-btn:active { transform: scale(0.99); }
+    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .result-section {
+      margin-top: 40px;
+      display: none;
+    }
+
+    .result-section.visible {
+      display: block;
+    }
+
+    .result-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .result-header h2 {
+      font-size: 18px;
+      font-weight: normal;
+      color: #d4b896;
+      letter-spacing: 0.05em;
+    }
+
+    .result-header .badge {
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: rgba(196,149,106,0.15);
+      border: 1px solid rgba(196,149,106,0.3);
+      color: #c4956a;
+    }
+
+    .result-content {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 12px;
+      padding: 32px;
+      line-height: 1.85;
+      font-size: 15px;
+      color: #d8d0c4;
+      white-space: pre-wrap;
+      min-height: 100px;
+    }
+
+    .result-content h1, .result-content h2, .result-content h3 {
+      color: #d4b896;
+      margin: 1.2em 0 0.5em;
+      font-weight: normal;
+    }
+
+    .typing-cursor {
+      display: inline-block;
+      width: 2px;
+      height: 1em;
+      background: #c4956a;
+      margin-left: 2px;
+      vertical-align: text-bottom;
+      animation: blink 0.8s step-end infinite;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
+    .loading-bar {
+      height: 2px;
+      background: linear-gradient(90deg, #8b5e3c, #c4956a, #8b5e3c);
+      background-size: 200%;
+      border-radius: 2px;
+      margin-bottom: 16px;
+      animation: shimmer 1.5s linear infinite;
+      display: none;
+    }
+
+    .loading-bar.active {
+      display: block;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    .status-line {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+      font-size: 14px;
+      color: #9b8e80;
+      min-height: 24px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      background: #c4956a;
+    }
+
+    .status-dot.thinking {
+      background: #c4956a;
+      animation: pulse 1.2s ease-in-out infinite;
+    }
+
+    .status-dot.streaming {
+      background: #90c47a;
+      animation: pulse 0.6s ease-in-out infinite;
+    }
+
+    .status-dot.done {
+      background: #90c47a;
+      animation: none;
+    }
+
+    .status-dot.error {
+      background: #e07070;
+      animation: none;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.4; transform: scale(0.7); }
+    }
+
+    .usage-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 4px;
+      align-items: center;
+      margin-top: 14px;
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 8px;
+      font-size: 13px;
+      color: #8a7f72;
+    }
+
+    .usage-bar b { color: #c4956a; }
+    .usage-bar .cost b { color: #90c47a; }
+    .usage-sep { color: rgba(255,255,255,0.15); }
+
+    .error-msg {
+      color: #e07070;
+      font-size: 14px;
+      margin-top: 12px;
+      display: none;
+    }
+
+    .insights-card {
+      margin-top: 36px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 16px;
+      padding: 28px;
+      overflow: hidden;
+    }
+
+    .insights-loading {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: #8a7f72;
+    }
+
+    .insights-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+    }
+
+    .insight-item {
+      border-radius: 12px;
+      padding: 18px 16px;
+    }
+
+    .insight-item.superpower {
+      background: rgba(196,149,106,0.08);
+      border: 1px solid rgba(196,149,106,0.2);
+    }
+
+    .insight-item.trap {
+      background: rgba(160,100,180,0.08);
+      border: 1px solid rgba(160,100,180,0.2);
+    }
+
+    .insight-item.advice {
+      background: rgba(144,196,122,0.08);
+      border: 1px solid rgba(144,196,122,0.2);
+    }
+
+    .insight-label {
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .superpower .insight-label { color: #c4956a; }
+    .trap       .insight-label { color: #b06ac0; }
+    .advice     .insight-label { color: #90c47a; }
+
+    .insight-text {
+      font-size: 14px;
+      line-height: 1.7;
+      color: #d8d0c4;
+    }
+
+    @media (max-width: 680px) {
+      .insights-grid { grid-template-columns: 1fr; }
+    }
+
+    .result-blocks-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 4px;
+    }
+
+    .result-block {
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .result-block-title {
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 10px 20px;
+      font-family: 'Georgia', serif;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .result-block-body {
+      padding: 20px 24px;
+      line-height: 1.85;
+      font-size: 14px;
+      color: #d8d0c4;
+    }
+
+    .result-block-body h2,
+    .result-block-body h3 {
+      color: #d4b896;
+      font-size: 14px;
+      font-weight: normal;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      margin: 1.6em 0 0.6em;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .result-block-body h4 {
+      color: #c4956a;
+      font-size: 14px;
+      font-weight: bold;
+      margin: 1.2em 0 0.4em;
+    }
+
+    .result-block-body p {
+      margin-bottom: 0.9em;
+    }
+
+    .result-block-body strong {
+      color: #e0d4c0;
+      font-weight: 600;
+    }
+
+    .result-block-body em {
+      color: #b8a898;
+      font-style: italic;
+    }
+
+    .result-block-body ul,
+    .result-block-body ol {
+      padding-left: 1.4em;
+      margin-bottom: 0.9em;
+    }
+
+    .result-block-body li {
+      margin-bottom: 0.3em;
+    }
+
+    .result-block-body hr {
+      border: none;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      margin: 1.2em 0;
+    }
+
+    .result-block-body blockquote {
+      border-left: 3px solid rgba(196,149,106,0.4);
+      padding-left: 14px;
+      color: #a8a098;
+      margin: 0.8em 0;
+    }
+
+    /* Цвета блоков по порядку */
+    .result-block:nth-child(1) { background: rgba(196,149,106,0.06); border: 1px solid rgba(196,149,106,0.15); }
+    .result-block:nth-child(1) .result-block-title { color: #c4956a; background: rgba(196,149,106,0.08); }
+
+    .result-block:nth-child(2) { background: rgba(120,100,200,0.06); border: 1px solid rgba(120,100,200,0.15); }
+    .result-block:nth-child(2) .result-block-title { color: #9b8ecc; background: rgba(120,100,200,0.08); }
+
+    .result-block:nth-child(3) { background: rgba(80,140,200,0.06); border: 1px solid rgba(80,140,200,0.15); }
+    .result-block:nth-child(3) .result-block-title { color: #7aabe0; background: rgba(80,140,200,0.08); }
+
+    .result-block:nth-child(4) { background: rgba(144,196,122,0.06); border: 1px solid rgba(144,196,122,0.15); }
+    .result-block:nth-child(4) .result-block-title { color: #90c47a; background: rgba(144,196,122,0.08); }
+
+    .result-block:nth-child(5) { background: rgba(200,120,120,0.06); border: 1px solid rgba(200,120,120,0.15); }
+    .result-block:nth-child(5) .result-block-title { color: #d08888; background: rgba(200,120,120,0.08); }
+
+    .result-block:nth-child(6) { background: rgba(196,149,106,0.04); border: 1px solid rgba(196,149,106,0.1); }
+    .result-block:nth-child(6) .result-block-title { color: #b8a080; background: rgba(196,149,106,0.06); }
+
+    .result-block:nth-child(7) { background: rgba(100,180,180,0.06); border: 1px solid rgba(100,180,180,0.15); }
+    .result-block:nth-child(7) .result-block-title { color: #78bebe; background: rgba(100,180,180,0.08); }
+
+    /* ── Custom section renderers ──────────────────────────── */
+    .result-block-body--custom { padding: 0; }
+
+    /* S3 shared */
+    .s3-container { display: flex; flex-direction: column; }
+    .s3-section { padding: 18px 22px; border-top: 1px solid rgba(255,255,255,0.05); }
+    .s3-section:first-child { border-top: none; }
+    .s3-section-label {
+      font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+      color: rgba(196,149,106,0.55); margin-bottom: 12px;
+    }
+    /* 3.1 Portrait */
+    .s3-pullquote {
+      font-family: 'Georgia', serif; font-style: italic;
+      font-size: 15.5px; line-height: 1.75; color: #d4b896;
+      border-left: 3px solid rgba(196,149,106,0.45);
+      padding-left: 16px; margin: 0 0 14px;
+    }
+    .s3-portrait-rest { font-size: 14px; line-height: 1.8; color: #c0b8b0; }
+    .s3-portrait-rest p { margin-bottom: 0.7em; }
+    /* 3.2 Strengths */
+    .s3-strengths-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px;
+    }
+    .s3-strength-card {
+      background: rgba(144,196,122,0.07); border: 1px solid rgba(144,196,122,0.18);
+      border-radius: 10px; padding: 13px 15px;
+    }
+    .s3-strength-name { font-size: 13px; font-weight: 600; color: #9ecc80; margin-bottom: 5px; }
+    .s3-strength-desc { font-size: 12.5px; line-height: 1.6; color: #90b074; }
+    /* 3.3 Shadows */
+    .s3-shadows { display: flex; flex-direction: column; gap: 8px; }
+    .s3-shadow-card {
+      background: rgba(196,149,106,0.06); border: 1px solid rgba(196,149,106,0.16);
+      border-radius: 10px; padding: 13px 15px;
+    }
+    .s3-shadow-name { font-size: 13px; font-weight: 600; color: #c4956a; margin-bottom: 6px; }
+    .s3-shadow-body { font-size: 12.5px; line-height: 1.6; color: #b8a888; margin-bottom: 7px; }
+    .s3-shadow-lesson {
+      font-size: 12px; color: #d4b896;
+      background: rgba(196,149,106,0.1); border-radius: 6px; padding: 5px 10px;
+    }
+    /* 3.4 Tasks */
+    .s3-tasks-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .s3-task-col { border-radius: 10px; padding: 13px 14px; }
+    .s3-task-develop { background: rgba(144,196,122,0.08); border: 1px solid rgba(144,196,122,0.2); }
+    .s3-task-release { background: rgba(110,180,232,0.08); border: 1px solid rgba(110,180,232,0.18); }
+    .s3-task-form    { background: rgba(196,149,106,0.08); border: 1px solid rgba(196,149,106,0.2); }
+    .s3-task-header { font-size: 12px; font-weight: 600; letter-spacing: 0.04em; margin-bottom: 9px; }
+    .s3-task-develop .s3-task-header { color: #90c47a; }
+    .s3-task-release .s3-task-header { color: #78b4e0; }
+    .s3-task-form    .s3-task-header { color: #c4956a; }
+    .s3-task-col ul  { list-style: none; padding: 0; margin: 0; }
+    .s3-task-col li  {
+      font-size: 12.5px; line-height: 1.5; color: #a8a098;
+      padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .s3-task-col li:last-child { border-bottom: none; }
+    .s3-task-col li::before { content: '·'; margin-right: 6px; opacity: 0.4; }
+    .s3-tasks-final {
+      margin-top: 10px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.05);
+      font-size: 13px; line-height: 1.75; color: #a89888; font-style: italic;
+    }
+
+    /* ── Section 4 ──────────────────────────────────────────── */
+    .s4-container { display: flex; flex-direction: column; }
+    .s4-spheres-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 16px 20px; }
+    .s4-sphere-card:last-child:nth-child(odd) { grid-column: 1 / -1; }
+    .s4-sphere-card {
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 10px; overflow: hidden;
+      border-top: 2px solid var(--sphere-color, #c4956a);
+    }
+    .s4-sphere-header { display: flex; align-items: center; gap: 8px; padding: 11px 14px 7px; }
+    .s4-sphere-icon  { font-size: 15px; line-height: 1; flex-shrink: 0; }
+    .s4-sphere-title {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.07em;
+      text-transform: uppercase; color: var(--sphere-color, #c4956a);
+    }
+    .s4-sphere-part { padding: 5px 14px 11px; }
+    .s4-sphere-part + .s4-sphere-part { border-top: 1px solid rgba(255,255,255,0.05); }
+    .s4-part-label {
+      font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+      color: rgba(255,255,255,0.28); margin-bottom: 4px;
+    }
+    .s4-part-text { font-size: 12.5px; line-height: 1.65; color: #b8b0a8; }
+    /* Timeline */
+    .s4-timeline { padding: 14px 20px 20px; border-top: 1px solid rgba(255,255,255,0.06); }
+    .s4-timeline-title {
+      font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+      color: rgba(196,149,106,0.55); margin-bottom: 14px;
+    }
+    .s4-timeline-items { display: flex; flex-direction: column; }
+    .s4-timeline-item  { display: flex; gap: 12px; align-items: stretch; }
+    .s4-timeline-left  { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; width: 12px; }
+    .s4-timeline-dot   { width: 8px; height: 8px; border-radius: 50%; background: rgba(196,149,106,0.7); flex-shrink: 0; margin-top: 6px; }
+    .s4-timeline-vline { width: 1px; background: rgba(196,149,106,0.15); flex: 1; margin: 4px 0; }
+    .s4-timeline-item:last-child .s4-timeline-vline { display: none; }
+    .s4-timeline-content { padding-bottom: 14px; flex: 1; }
+    .s4-timeline-label { font-size: 11px; font-weight: 600; color: #c4956a; margin-bottom: 3px; }
+    .s4-timeline-text  { font-size: 12.5px; line-height: 1.6; color: #a89888; }
+
+    /* ── Section 4 extra sub-fields ────────────────────────── */
+    .s4-professions {
+      display: flex; flex-wrap: wrap; gap: 5px; margin-top: 2px;
+    }
+    .s4-profession-tag {
+      font-size: 11px; padding: 2px 8px; border-radius: 20px;
+      background: rgba(196,149,106,0.1); border: 1px solid rgba(196,149,106,0.25);
+      color: #c4956a;
+    }
+
+    /* ── Section 6 ──────────────────────────────────────────── */
+    .s6-container { display: flex; flex-direction: column; gap: 0; }
+    .s6-destiny {
+      padding: 16px 20px 14px; font-size: 14px; line-height: 1.8; color: #d0c4b4;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .s6-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr);
+      gap: 0; padding: 4px 0;
+    }
+    .s6-item {
+      padding: 13px 20px; border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .s6-item:nth-child(odd):not(:last-child) { border-right: 1px solid rgba(255,255,255,0.04); }
+    .s6-item-label {
+      font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+      color: rgba(196,149,106,0.7); margin-bottom: 5px;
+    }
+    .s6-item-text { font-size: 12.5px; line-height: 1.65; color: #b8b0a8; }
+    .s6-themes-wrap {
+      padding: 14px 20px 18px; border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .s6-themes-label {
+      font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+      color: rgba(255,255,255,0.28); margin-bottom: 10px;
+    }
+    .s6-themes { display: flex; flex-wrap: wrap; gap: 7px; }
+    .s6-theme-tag {
+      font-size: 12px; padding: 4px 12px; border-radius: 20px;
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+      color: #c0b4a4;
+    }
+
+    @media (max-width: 600px) {
+      .s3-tasks-grid   { grid-template-columns: 1fr; }
+      .s4-spheres-grid { grid-template-columns: 1fr; }
+      .s4-sphere-card:last-child:nth-child(odd) { grid-column: auto; }
+      .s6-grid { grid-template-columns: 1fr; }
+      .s6-item:nth-child(odd) { border-right: none; }
+    }
+
+    .result-stream-block {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 12px;
+      padding: 20px 24px;
+      line-height: 1.85;
+      font-size: 15px;
+      color: #d8d0c4;
+    }
+
+    .result-stream-block h2, .result-stream-block h3 {
+      color: #d4b896; font-size: 14px; font-weight: normal;
+      letter-spacing: 0.07em; text-transform: uppercase;
+      margin: 1.4em 0 0.5em; padding-bottom: 5px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    .result-stream-block p { margin-bottom: 0.9em; }
+    .result-stream-block strong { color: #e0d4c0; font-weight: 600; }
+    .result-stream-block ul, .result-stream-block ol { padding-left: 1.4em; margin-bottom: 0.9em; }
+    .result-stream-block li { margin-bottom: 0.3em; }
+
+    /* ── Lifechart ──────────────────────────────────────────── */
+    .lifechart-section {
+      margin-top: 36px;
+    }
+
+    .lifechart-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .lifechart-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(120,170,230,0.12);
+      border: 1px solid rgba(120,170,230,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: #78aae6;
+      flex-shrink: 0;
+    }
+
+    .lifechart-header h2 {
+      font-size: 18px;
+      font-weight: normal;
+      color: #d4b896;
+      letter-spacing: 0.04em;
+    }
+
+    .lifechart-header p {
+      font-size: 13px;
+      color: #6b6358;
+      margin-top: 2px;
+      font-style: italic;
+    }
+
+    .lifechart-loading {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #7a6f65;
+      font-size: 14px;
+      padding: 18px 0;
+    }
+
+    .lifechart-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .lc-toggle {
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: transparent;
+      color: #6a6058;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .lc-toggle.active {
+      border-color: var(--lc-color);
+      color: var(--lc-color);
+      background: rgba(255,255,255,0.04);
+    }
+
+    .lc-toggle:hover {
+      border-color: var(--lc-color);
+      color: var(--lc-color);
+    }
+
+    .lifechart-wrap {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 16px;
+      overflow: hidden;
+    }
+
+    .lifechart-note {
+      margin-top: 12px;
+      font-size: 12px;
+      color: #5a5248;
+      font-style: italic;
+      text-align: center;
+    }
+
+    .decode-section {
+      margin-top: 36px;
+    }
+
+    .decode-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .decode-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(144,196,122,0.12);
+      border: 1px solid rgba(144,196,122,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: #90c47a;
+      flex-shrink: 0;
+    }
+
+    .decode-header h2 {
+      font-size: 18px;
+      font-weight: normal;
+      color: #d4b896;
+      letter-spacing: 0.04em;
+    }
+
+    .decode-header p {
+      font-size: 13px;
+      color: #6b6358;
+      margin-top: 2px;
+      font-style: italic;
+    }
+
+    .decode-content {
+      background: rgba(144,196,122,0.04);
+      border: 1px solid rgba(144,196,122,0.1);
+      border-radius: 12px;
+      padding: 28px 32px;
+      line-height: 1.8;
+      font-size: 13.5px;
+      color: #d8d0c4;
+    }
+
+    .decode-content strong, .decode-content b {
+      color: #90c47a;
+      font-weight: normal;
+    }
+
+    .mode-btn {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04);
+      color: #9b8e80;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .mode-btn.active {
+      border-color: #90c47a;
+      background: rgba(144,196,122,0.1);
+      color: #90c47a;
+    }
+
+    /* Карточка рассчитанной карты */
+    .chart-card {
+      margin-top: 28px;
+      background: rgba(144,196,122,0.04);
+      border: 1px solid rgba(144,196,122,0.15);
+      border-radius: 16px;
+      padding: 24px 28px;
+    }
+
+    .chart-card-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .chart-icon {
+      font-size: 28px;
+      opacity: 0.7;
+    }
+
+    .chart-title {
+      font-size: 15px;
+      color: #90c47a;
+      letter-spacing: 0.04em;
+    }
+
+    .chart-subtitle {
+      font-size: 12px;
+      color: #7a9e6a;
+      margin-top: 3px;
+    }
+
+    .chart-pre {
+      font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+      font-size: 12.5px;
+      line-height: 1.7;
+      color: #c0d8b8;
+      white-space: pre-wrap;
+      word-break: break-word;
+      margin: 0;
+    }
+
+    /* ── Autocomplete ───────────────────────────────────────── */
+    .autocomplete-wrap {
+      position: relative;
+    }
+
+    .autocomplete-dropdown {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0; right: 0;
+      background: #1c1c30;
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 10px;
+      z-index: 100;
+      overflow: hidden;
+      display: none;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      max-height: 260px;
+      overflow-y: auto;
+    }
+
+    .autocomplete-dropdown.open {
+      display: block;
+    }
+
+    .autocomplete-item {
+      padding: 11px 14px;
+      cursor: pointer;
+      font-size: 14px;
+      color: #d0c8bc;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      transition: background 0.15s;
+    }
+
+    .autocomplete-item:last-child {
+      border-bottom: none;
+    }
+
+    .autocomplete-item:hover,
+    .autocomplete-item.highlighted {
+      background: rgba(196,149,106,0.12);
+    }
+
+    .autocomplete-item .ac-main {
+      font-size: 14px;
+      color: #e8e0d0;
+    }
+
+    .autocomplete-item .ac-sub {
+      font-size: 12px;
+      color: #7a7068;
+    }
+
+    .autocomplete-item .ac-type {
+      font-size: 11px;
+      color: #6a6060;
+      margin-left: auto;
+      white-space: nowrap;
+    }
+
+    .autocomplete-loading {
+      padding: 12px 14px;
+      font-size: 13px;
+      color: #7a7068;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ── Time + period indicator ────────────────────────────── */
+    .time-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .time-period {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      transition: all 0.3s;
+    }
+
+    .time-period.visible {
+      display: flex;
+    }
+
+    .time-period.night    { background: rgba(60,40,120,0.25); border: 1px solid rgba(100,80,180,0.2); color: #a090d0; }
+    .time-period.dawn     { background: rgba(180,100,60,0.15); border: 1px solid rgba(220,140,80,0.2); color: #d4a070; }
+    .time-period.morning  { background: rgba(200,160,60,0.12); border: 1px solid rgba(220,180,80,0.2); color: #d4c070; }
+    .time-period.day      { background: rgba(200,160,40,0.12); border: 1px solid rgba(220,180,60,0.2); color: #d4c060; }
+    .time-period.evening  { background: rgba(100,60,160,0.18); border: 1px solid rgba(140,80,200,0.2); color: #b090c0; }
+
+    .time-period .tp-icon { font-size: 16px; }
+    .time-period .tp-label { font-weight: normal; }
+    .time-period .tp-hours {
+      margin-left: auto;
+      font-size: 12px;
+      opacity: 0.6;
+    }
+
+    @media (max-width: 560px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .card { padding: 24px 20px; }
+      .decode-content { padding: 20px 16px; }
+      .chart-card { padding: 18px 16px; }
+    }
+
+    /* ── Section 5 — 7-летние циклы ──────────────────────────── */
+    .s5-cycles { display: flex; flex-direction: column; gap: 10px; padding: 16px 20px; }
+
+    .s5-cycle {
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.07);
+      background: rgba(255,255,255,0.03);
+    }
+    .s5-cycle.is-current {
+      border-color: rgba(196,149,106,0.25);
+      background: rgba(196,149,106,0.06);
+    }
+
+    .s5-cycle-header {
+      padding: 10px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .s5-cycle-range {
+      font-size: 13px;
+      font-weight: 600;
+      color: #c4956a;
+      flex-shrink: 0;
+    }
+    .s5-cycle.is-current .s5-cycle-range { color: #d4b896; }
+    .s5-cycle-theme {
+      font-size: 12px;
+      color: #8a7f72;
+      font-style: italic;
+      flex: 1;
+    }
+    .s5-cycle-current-badge {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: rgba(196,149,106,0.15);
+      border: 1px solid rgba(196,149,106,0.3);
+      color: #c4956a;
+      letter-spacing: 0.05em;
+      flex-shrink: 0;
+    }
+
+    .s5-cycle-rows {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      padding: 8px 12px;
+    }
+    .s5-row {
+      display: flex;
+      gap: 8px;
+      padding: 5px 6px;
+      font-size: 12.5px;
+      line-height: 1.55;
+      color: #a89888;
+    }
+    .s5-row-icon { flex-shrink: 0; font-size: 14px; width: 22px; }
+    .s5-row-text { flex: 1; }
+
+    .s5-peaks {
+      padding: 14px 20px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .s5-peaks-title {
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(196,149,106,0.55);
+      margin-bottom: 12px;
+    }
+    .s5-peaks-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+    .s5-peak-item {
+      flex: 1;
+      min-width: 130px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 8px;
+      padding: 9px 12px;
+    }
+    .s5-peak-label  { font-size: 11px; color: #7a7068; margin-bottom: 3px; }
+    .s5-peak-range  { font-size: 13px; font-weight: 600; color: #c4956a; margin-bottom: 2px; }
+    .s5-peak-reason { font-size: 12px; color: #8a7f72; line-height: 1.5; }
+
+    .s5-summary {
+      padding: 14px 20px 18px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      font-size: 13.5px;
+      line-height: 1.8;
+      color: #a89888;
+      font-style: italic;
+    }
+
+    @media (max-width: 560px) {
+      .s5-cycle-rows { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="stars"></div>
+  <div class="container">
+    <header>
+      <div class="glyph">☯</div>
+      <h1>Паспорт Жизни</h1>
+      <p>Личный анализ · Путь · Предназначение</p>
+    </header>
+
+    <div class="card">
+      <form id="baziForm">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Имя</label>
+            <input type="text" id="name" placeholder="Введите имя" required />
+          </div>
+
+          <div class="form-group">
+            <label>Место рождения</label>
+            <div class="autocomplete-wrap" id="birthplaceWrap">
+              <input type="text" id="birthplace" placeholder="Начните вводить город или село..." autocomplete="off" required />
+              <div class="autocomplete-dropdown" id="cityDropdown"></div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Дата рождения</label>
+            <input type="date" id="birthdate" required />
+          </div>
+
+          <div class="form-group">
+            <label>Время рождения <span style="font-size:11px;font-weight:normal;color:#7a7068;letter-spacing:0">— нужна точность ±1 час</span></label>
+            <div class="time-wrap">
+              <input type="time" id="birthtimeInput" required />
+              <div class="time-period" id="timePeriod"></div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Пол</label>
+            <select id="gender" required>
+              <option value="" disabled selected>Выберите пол</option>
+              <option value="female">Женский</option>
+              <option value="male">Мужской</option>
+            </select>
+          </div>
+
+          <div class="form-group full" id="openaiModelGroup" style="display:none">
+            <label>Модель OpenAI</label>
+            <select id="openaiModel">
+              <optgroup label="o-серия (рассуждение)">
+                <option value="o3">o3 — топовое рассуждение</option>
+                <option value="o3-mini">o3-mini — компактное рассуждение</option>
+                <option value="o4-mini">o4-mini — новый быстрый</option>
+                <option value="o1">o1 — глубокое рассуждение</option>
+                <option value="o1-mini">o1-mini — лёгкое рассуждение</option>
+              </optgroup>
+              <optgroup label="GPT-4">
+                <option value="gpt-4-turbo">gpt-4-turbo</option>
+                <option value="gpt-4">gpt-4</option>
+              </optgroup>
+              <optgroup label="GPT-3.5">
+                <option value="gpt-3.5-turbo">gpt-3.5-turbo — самый быстрый</option>
+              </optgroup>
+            </select>
+          </div>
+
+        </div>
+
+        <input type="hidden" id="calcMode" value="v2">
+
+        <button type="submit" class="submit-btn" id="submitBtn" disabled>
+          Создать Паспорт Жизни
+        </button>
+        <div class="error-msg" id="errorMsg"></div>
+      </form>
+    </div>
+
+    <!-- Карточка с рассчитанной картой (только v2) -->
+    <div class="chart-card" id="chartCard" style="display:none">
+      <div class="chart-card-header">
+        <span class="chart-icon">算</span>
+        <div>
+          <div class="chart-title">Рассчитанная карта</div>
+          <div class="chart-subtitle">Точный математический расчёт столпов</div>
+        </div>
+      </div>
+      <pre class="chart-pre" id="chartPre"></pre>
+    </div>
+
+    <div class="result-section" id="resultSection">
+      <div class="result-header">
+        <h2 id="resultName">Анализ</h2>
+      </div>
+
+      <div class="insights-card" id="insightsCard" style="display:none">
+        <div class="insights-loading" id="insightsLoading">
+          <span class="status-dot thinking"></span>
+          <span>Формирую главное про тебя...</span>
+        </div>
+        <div class="insights-grid" id="insightsGrid" style="display:none">
+          <div class="insight-item superpower">
+            <div class="insight-label">⚡ Твоя суперсила</div>
+            <div class="insight-text" id="insightSuperpower"></div>
+          </div>
+          <div class="insight-item trap">
+            <div class="insight-label">🌀 Твоя ловушка</div>
+            <div class="insight-text" id="insightTrap"></div>
+          </div>
+          <div class="insight-item advice">
+            <div class="insight-label">✦ Совет сейчас</div>
+            <div class="insight-text" id="insightAdvice"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="loading-bar" id="loadingBar"></div>
+      <div class="status-line" id="statusLine" style="display:none">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText"></span>
+      </div>
+      <div id="resultBlocks"></div>
+
+      <!-- ── Статичный шаблон v2 (заполняется через fillTemplate) ── -->
+      <div class="result-blocks-wrap" id="resultBlocksWrap" hidden>
+
+        <!-- Секция 1: Общая картина -->
+        <div class="result-block" id="s1Block">
+          <div class="result-block-title">Общая картина судьбы</div>
+          <div class="result-block-body" id="s1Body"></div>
+        </div>
+
+        <!-- Секция 3: Портрет личности -->
+        <div class="result-block" id="s3Block">
+          <div class="result-block-title">Портрет личности</div>
+          <div class="result-block-body result-block-body--custom">
+            <div class="s3-container">
+              <div class="s3-section">
+                <div class="s3-section-label">Психологический портрет</div>
+                <div class="s3-portrait-rest" id="s3Portrait"></div>
+              </div>
+              <div class="s3-section">
+                <div class="s3-section-label">Сильные стороны</div>
+                <div class="s3-strengths-grid" id="s3Strengths"></div>
+              </div>
+              <div class="s3-section">
+                <div class="s3-section-label">Теневые паттерны</div>
+                <div class="s3-shadows" id="s3Shadows"></div>
+              </div>
+              <div class="s3-section">
+                <div class="s3-section-label">Жизненные задачи</div>
+                <div class="s3-tasks-grid" id="s3Tasks"></div>
+                <div class="s3-tasks-final" id="s3TasksSummary"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Секция 4: Сферы жизни -->
+        <div class="result-block" id="s4Block">
+          <div class="result-block-title">Сферы жизни — сейчас</div>
+          <div class="result-block-body result-block-body--custom">
+            <div class="s4-container">
+              <div class="s4-spheres-grid" id="s4Spheres"></div>
+              <div class="s4-timeline" id="s4TimelineWrap">
+                <div class="s4-timeline-title">Таймлайн ближайших 12 месяцев</div>
+                <div class="s4-timeline-items" id="s4TimelineItems"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Секция 5: 7-летние циклы -->
+        <div class="result-block" id="s5Block">
+          <div class="result-block-title">Карта жизни — 7-летние циклы</div>
+          <div class="result-block-body result-block-body--custom">
+            <div class="s5-container">
+              <div class="s5-cycles" id="s5Cycles"></div>
+              <div class="s5-peaks" id="s5Peaks" hidden></div>
+              <div class="s5-summary" id="s5Summary" hidden></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Секция 6: Судьба и предназначение -->
+        <div class="result-block" id="s6Block" hidden>
+          <div class="result-block-title">Судьба и предназначение</div>
+          <div class="result-block-body result-block-body--custom">
+            <div class="s6-container">
+              <div class="s6-destiny" id="s6Destiny"></div>
+              <div class="s6-grid">
+                <div class="s6-item">
+                  <div class="s6-item-label">🎁 Природные дары</div>
+                  <div class="s6-item-text" id="s6Gifts"></div>
+                </div>
+                <div class="s6-item">
+                  <div class="s6-item-label">🔨 Зоны роста</div>
+                  <div class="s6-item-text" id="s6Work"></div>
+                </div>
+                <div class="s6-item">
+                  <div class="s6-item-label">🌿 Духовный путь</div>
+                  <div class="s6-item-text" id="s6Spiritual"></div>
+                </div>
+                <div class="s6-item">
+                  <div class="s6-item-label">🌳 Родовые паттерны</div>
+                  <div class="s6-item-text" id="s6Ancestral"></div>
+                </div>
+                <div class="s6-item" style="grid-column: 1 / -1">
+                  <div class="s6-item-label">🧭 Благоприятные направления</div>
+                  <div class="s6-item-text" id="s6Directions"></div>
+                </div>
+              </div>
+              <div class="s6-themes-wrap" id="s6ThemesWrap" hidden>
+                <div class="s6-themes-label">Повторяющиеся жизненные темы</div>
+                <div class="s6-themes" id="s6Themes"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="result-content" id="resultContent" style="display:none"></div>
+    </div>
+
+    <!-- График жизни по 7-летним циклам -->
+
+    <div class="decode-section" id="decodeSection" style="display:none">
+      <div class="decode-header">
+        <div class="decode-icon">✦</div>
+        <div>
+          <h2>Простыми словами</h2>
+          <p>Главное из анализа — без терминов</p>
+        </div>
+      </div>
+      <div class="status-line" id="decodeStatusLine" style="display:none">
+        <span class="status-dot" id="decodeStatusDot"></span>
+        <span id="decodeStatusText"></span>
+      </div>
+      <div class="decode-content" id="decodeContent"></div>
+    </div>
+  </div>
+
+  <script>
+    const PROVIDER = 'openai';
+    const MODEL    = 'o3';
+    let selectedMode = 'v2';
+    let currentChart = null;  // хранит рассчитанную карту для графика
+
+
+    // ── Time period indicator ──────────────────────────────────
+    const TIME_PERIODS = [
+      { from: 0,  to: 5,  icon: '🌙', label: 'глубокая ночь', cls: 'night',   range: '00:00–05:00' },
+      { from: 5,  to: 8,  icon: '🌅', label: 'рассвет',       cls: 'dawn',    range: '05:00–08:00' },
+      { from: 8,  to: 12, icon: '☀️', label: 'утро',          cls: 'morning', range: '08:00–12:00' },
+      { from: 12, to: 17, icon: '☀️', label: 'день',          cls: 'day',     range: '12:00–17:00' },
+      { from: 17, to: 21, icon: '🌇', label: 'вечер',         cls: 'evening', range: '17:00–21:00' },
+      { from: 21, to: 24, icon: '🌙', label: 'ночь',          cls: 'night',   range: '21:00–00:00' },
+    ];
+
+    function updateTimePeriod(val) {
+      const el = document.getElementById('timePeriod');
+      if (!val) { el.className = 'time-period'; return; }
+      const h = parseInt(val.split(':')[0], 10);
+      const p = TIME_PERIODS.find(x => h >= x.from && h < x.to) || TIME_PERIODS[0];
+      el.className = `time-period visible ${p.cls}`;
+      el.innerHTML = `
+        <span class="tp-icon">${p.icon}</span>
+        <span class="tp-label">${p.label}</span>
+        <span class="tp-hours">${p.range}</span>`;
+    }
+
+    document.getElementById('birthtimeInput').addEventListener('input', e => {
+      updateTimePeriod(e.target.value);
+      checkFormReady();
+    });
+    document.getElementById('birthtimeInput').addEventListener('change', e => {
+      updateTimePeriod(e.target.value);
+      checkFormReady();
+    });
+
+    // ── Валидация формы — кнопка активна только когда все поля заполнены ──
+    function checkFormReady() {
+      const ok =
+        document.getElementById('name').value.trim() !== '' &&
+        document.getElementById('birthplace').value.trim() !== '' &&
+        document.getElementById('birthdate').value !== '' &&
+        document.getElementById('birthtimeInput').value !== '' &&
+        document.getElementById('gender').value !== '';
+      document.getElementById('submitBtn').disabled = !ok;
+    }
+
+    document.getElementById('name').addEventListener('input', checkFormReady);
+    document.getElementById('birthplace').addEventListener('input', checkFormReady);
+    document.getElementById('birthdate').addEventListener('change', checkFormReady);
+    document.getElementById('gender').addEventListener('change', checkFormReady);
+
+    // ── City autocomplete ──────────────────────────────────────
+    let acTimer = null;
+    let acIndex = -1;
+
+    const acInput    = document.getElementById('birthplace');
+    const acDropdown = document.getElementById('cityDropdown');
+
+    function closeDropdown() {
+      acDropdown.classList.remove('open');
+      acDropdown.innerHTML = '';
+      acIndex = -1;
+    }
+
+    function renderItems(items) {
+      acDropdown.innerHTML = '';
+      acIndex = -1;
+      if (!items.length) { closeDropdown(); return; }
+      items.forEach((item, i) => {
+        const div = document.createElement('div');
+        div.className = 'autocomplete-item';
+        div.dataset.idx = i;
+        div.innerHTML = `
+          <span class="ac-main">${escHtml(item.main)}</span>
+          <span class="ac-sub">${escHtml(item.sub)}</span>
+          <span class="ac-type">${escHtml(item.type)}</span>`;
+        div.addEventListener('mousedown', (e) => {
+          e.preventDefault();
+          acInput.value = item.full;
+          closeDropdown();
+          checkFormReady();
+        });
+        acDropdown.appendChild(div);
+      });
+      acDropdown.classList.add('open');
+    }
+
+    function highlightItem(idx) {
+      const items = acDropdown.querySelectorAll('.autocomplete-item');
+      items.forEach((el, i) => {
+        el.classList.toggle('highlighted', i === idx);
+      });
+      if (idx >= 0 && items[idx]) {
+        items[idx].scrollIntoView({ block: 'nearest' });
+      }
+    }
+
+    acInput.addEventListener('keydown', (e) => {
+      if (!acDropdown.classList.contains('open')) return;
+      const items = acDropdown.querySelectorAll('.autocomplete-item');
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        acIndex = Math.min(acIndex + 1, items.length - 1);
+        highlightItem(acIndex);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        acIndex = Math.max(acIndex - 1, -1);
+        highlightItem(acIndex);
+      } else if (e.key === 'Enter' && acIndex >= 0) {
+        e.preventDefault();
+        items[acIndex].dispatchEvent(new Event('mousedown'));
+      } else if (e.key === 'Escape') {
+        closeDropdown();
+      }
+    });
+
+    acInput.addEventListener('input', () => {
+      clearTimeout(acTimer);
+      const q = acInput.value.trim();
+      if (q.length < 2) { closeDropdown(); return; }
+
+      // Show loading spinner
+      acDropdown.innerHTML = '<div class="autocomplete-loading"><span class="status-dot thinking"></span> Ищу населённые пункты...</div>';
+      acDropdown.classList.add('open');
+
+      acTimer = setTimeout(() => fetchCities(q), 320);
+    });
+
+    acInput.addEventListener('blur', () => {
+      // Small delay so mousedown on item fires first
+      setTimeout(closeDropdown, 180);
+    });
+
+    async function fetchCities(q) {
+      try {
+        const r = await fetch(`/api/cities?q=${encodeURIComponent(q)}`);
+        if (!r.ok) throw new Error();
+        const data = await r.json();
+        renderItems(data);
+      } catch {
+        closeDropdown();
+      }
+    }
+
+    function escHtml(s) {
+      return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function setStatus(state, text) {
+      const line = document.getElementById('statusLine');
+      const dot  = document.getElementById('statusDot');
+      const txt  = document.getElementById('statusText');
+      if (!text) { line.style.display = 'none'; return; }
+      line.style.display = 'flex';
+      dot.className = 'status-dot ' + state;
+      txt.textContent = text;
+    }
+
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedMode = btn.dataset.mode;
+      });
+    });
+
+    document.getElementById('baziForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const name        = document.getElementById('name').value.trim();
+      const birthplace  = document.getElementById('birthplace').value.trim();
+      const birthdate   = document.getElementById('birthdate').value;
+      const birthtime   = document.getElementById('birthtimeInput').value;
+      const datetimeVal = `${birthdate}T${birthtime}`;
+      const gender      = document.getElementById('gender').value;
+
+      const submitBtn    = document.getElementById('submitBtn');
+      const errorMsg     = document.getElementById('errorMsg');
+      const resultSection = document.getElementById('resultSection');
+      const resultContent = document.getElementById('resultContent');
+      const loadingBar   = document.getElementById('loadingBar');
+      const resultName   = document.getElementById('resultName');
+
+      errorMsg.style.display = 'none';
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Формирую паспорт...';
+
+      resultName.textContent = name;
+      resultSection.classList.add('visible');
+      resultContent.textContent = '';
+      document.getElementById('resultBlocks').innerHTML = '';
+      loadingBar.classList.add('active');
+      document.getElementById('decodeSection').style.display = 'none';
+      document.getElementById('chartCard').style.display = 'none';
+
+      const insightsCard = document.getElementById('insightsCard');
+      insightsCard.style.display = 'block';
+      document.getElementById('insightsLoading').style.display = 'flex';
+      document.getElementById('insightsGrid').style.display = 'none';
+
+      const cursor = document.createElement('span');
+      cursor.className = 'typing-cursor';
+
+      if (selectedMode === 'v2') {
+        await runAnalyzeV2({ name, birthplace, birthdate, birthtime, gender, cursor, loadingBar, resultContent, errorMsg });
+      } else {
+        await runAnalyzeV1({ name, birthplace, birthtime: datetimeVal, gender, cursor, loadingBar, resultContent, errorMsg });
+      }
+
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Создать Паспорт Жизни';
+    });
+
+    // ── V2: точный расчёт + интерпретация ──────────────────────
+    async function runAnalyzeV2({ name, birthplace, birthdate, birthtime, gender, cursor, loadingBar, resultContent, errorMsg }) {
+      setStatus('thinking', 'Вычисляю карту...');
+
+      try {
+        const response = await fetch('/api/analyze-v2', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, birthplace, birthdate, birthtime, gender, provider: PROVIDER, model: MODEL }),
+        });
+
+        if (!response.ok) {
+          const err = await response.json();
+          throw new Error(err.error || 'Ошибка сервера');
+        }
+
+        const reader  = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        let logFile = null;
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop();
+
+          for (const line of lines) {
+            if (!line.startsWith('data: ')) continue;
+            const raw = line.slice(6);
+            if (raw === '[DONE]') {
+              loadingBar.classList.remove('active');
+              setStatus('done', 'Готово');
+              break;
+            }
+            try {
+              const parsed = JSON.parse(raw);
+              if (parsed.error) throw new Error(parsed.error);
+
+              // Первый пакет — рассчитанная карта
+              if (parsed.chartText) {
+                setStatus('thinking', 'Карта рассчитана. Строю паспорт...');
+                if (parsed.chart) currentChart = parsed.chart;
+              }
+
+              // Основной пакет — интерпретация JSON
+              if (parsed.interpretation) {
+                fillTemplate(parsed.interpretation);
+              }
+
+              if (parsed.logFile) logFile = parsed.logFile;
+            } catch (e) {
+              if (e.message && e.message !== 'Unexpected end of JSON input') throw e;
+            }
+          }
+        }
+      } catch (err) {
+        loadingBar.classList.remove('active');
+        setStatus('error', 'Ошибка: ' + err.message);
+        errorMsg.textContent = 'Ошибка: ' + err.message;
+        errorMsg.style.display = 'block';
+      }
+    }
+
+    // ── V1: старый режим (LLM сам считает) ─────────────────────
+    async function runAnalyzeV1({ name, birthplace, birthtime, gender, cursor, loadingBar, resultContent, errorMsg }) {
+      setStatus('thinking', 'Отправляю запрос...');
+
+      try {
+        const response = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, birthplace, birthtime, gender, provider: PROVIDER, model: MODEL }),
+        });
+
+        if (!response.ok) {
+          const err = await response.json();
+          throw new Error(err.error || 'Ошибка сервера');
+        }
+
+        setStatus('thinking', 'Модель думает...');
+
+        const reader  = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        let firstChunk = true;
+        let logFile = null;
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop();
+
+          for (const line of lines) {
+            if (!line.startsWith('data: ')) continue;
+            const raw = line.slice(6);
+            if (raw === '[DONE]') {
+              loadingBar.classList.remove('active');
+              cursor.remove();
+              setStatus('done', 'Готово');
+              const analysisText = resultContent.textContent;
+              renderBlocks(analysisText);
+              runInsights({ analysisText });
+              runDecode(analysisText, logFile);
+              break;
+            }
+            try {
+              const parsed = JSON.parse(raw);
+              if (parsed.error) throw new Error(parsed.error);
+              if (parsed.text) {
+                if (firstChunk) {
+                  firstChunk = false;
+                  setStatus('streaming', 'Получаю ответ...');
+                }
+                resultContent.textContent += parsed.text;
+              }
+              if (parsed.logFile) logFile = parsed.logFile;
+            } catch {}
+          }
+        }
+      } catch (err) {
+        loadingBar.classList.remove('active');
+        cursor.remove();
+        setStatus('error', 'Ошибка: ' + err.message);
+        errorMsg.textContent = 'Ошибка: ' + err.message;
+        errorMsg.style.display = 'block';
+      }
+    }
+
+    // U+2501 ━  U+2550 ═  U+2500 ─  U+254C ╌  U+254D ╍
+    // Намеренно НЕ включаем U+2014 — (тире), т.к. оно встречается в заголовках разделов
+    const BOX = '\u2501\u2550\u2500\u254C\u254D';
+    const BOX_RE   = new RegExp('[' + BOX + ']{3,}');
+    const PURE_SEP = new RegExp('^[\\s\\d.]*[' + BOX + ']{3,}[\\s]*$');
+    const STRIP_BOX = new RegExp('[' + BOX + ']+', 'g');
+
+    // Строка является чистым разделителем (только линии, цифры, пробелы)
+    function isPureSep(t) {
+      return PURE_SEP.test(t);
+    }
+
+    // Извлекаем название раздела из строки любого стиля форматирования.
+    function getSectionTitle(line) {
+      const t = line.trim();
+      if (!t) return null;
+      if (isPureSep(t)) return null;
+
+      // Стираем все линии-разделители, ведущие цифры/точки, решётки, звёздочки
+      const stripped = t
+        .replace(STRIP_BOX, ' ')   // ═══ и ━━━ → пробел
+        .replace(/^[\s\d.]+/, '')  // ведущие цифры/точки/пробелы
+        .replace(/^#+\s*/, '')     // markdown #
+        .replace(/\*+/g, '')       // **жирный**
+        .trim();
+
+      const m = stripped.match(/^(РАЗДЕЛ\s+\d+\W.{3,})/i);
+      if (m) return m[1].trim();
+
+      return null;
+    }
+
+    function cleanTitle(title) {
+      return title
+        .replace(/КАРТА\s+БА-ЦЗЫ(\s+ДЛЯ\s+\S+)?/gi, 'Твой паспорт')
+        .replace(/^#+\s*/, '')
+        .replace(/\*+/g, '')
+        .trim();
+    }
+
+    // ── Section 3 renderer ──────────────────────────────────
+    function renderSection3(body) {
+      const wrap = document.createElement('div');
+      wrap.className = 's3-container';
+
+      // Split into subsections 3.1–3.4
+      const lines = body.split('\n');
+      const subs = {}; let cur = null, buf = [];
+      for (const line of lines) {
+        const m = line.match(/^#{0,3}\s*3\.([1-4])\b/);
+        if (m) { if (cur) subs[cur] = buf.join('\n').trim(); cur = m[1]; buf = []; }
+        else buf.push(line);
+      }
+      if (cur) subs[cur] = buf.join('\n').trim();
+
+      function makeSection(labelText) {
+        const sec = document.createElement('div');
+        sec.className = 's3-section';
+        const lbl = document.createElement('div');
+        lbl.className = 's3-section-label';
+        lbl.textContent = labelText;
+        sec.appendChild(lbl);
+        return sec;
+      }
+
+      // 3.1 — Pull-quote + prose
+      if (subs['1']) {
+        const sec = makeSection('Психологический портрет');
+        const paras = subs['1'].split(/\n\n+/).filter(Boolean);
+        if (paras.length) {
+          const q = document.createElement('blockquote');
+          q.className = 's3-pullquote';
+          q.textContent = paras[0].replace(/^>\s*/, '').trim();
+          sec.appendChild(q);
+        }
+        if (paras.length > 1) {
+          const rest = document.createElement('div');
+          rest.className = 's3-portrait-rest';
+          rest.innerHTML = marked.parse(paras.slice(1).join('\n\n'));
+          sec.appendChild(rest);
+        }
+        wrap.appendChild(sec);
+      }
+
+      // 3.2 — Strength cards
+      if (subs['2']) {
+        const sec = makeSection('Сильные стороны');
+        const rawS2 = subs['2'];
+        let strengthItems = [];
+        const h4S = rawS2.split(/^####\s*/m).filter(c => c.trim());
+        if (h4S.length >= 2) {
+          for (const chunk of h4S) {
+            const nl = chunk.indexOf('\n');
+            const name = (nl === -1 ? chunk : chunk.slice(0, nl)).replace(/\*+/g, '').trim();
+            const desc = nl === -1 ? '' : chunk.slice(nl + 1).replace(/\*+/g, '').trim();
+            if (name) strengthItems.push({ name, desc });
+          }
+        } else {
+          // Old format: numbered/bulleted lines "1. Name – desc." or "• Name – desc."
+          const lines = rawS2.split('\n').filter(l => l.trim().match(/^(\d+\.|[-•*·])/));
+          for (const line of lines) {
+            const t = line.replace(/^[\d.\s•*\-·]+/, '').replace(/\*+/g, '').trim();
+            const dashIdx = t.search(/[—–\-]/);
+            let name, desc;
+            if (dashIdx !== -1) {
+              name = t.slice(0, dashIdx).trim();
+              desc = t.slice(dashIdx + 1).trim();
+            } else {
+              // No dash — use period as separator or take first 40 chars as name
+              const dotIdx = t.search(/\.\s+[а-яёa-z]/);
+              name = dotIdx !== -1 ? t.slice(0, dotIdx) : t.slice(0, 50);
+              desc = dotIdx !== -1 ? t.slice(dotIdx + 1).trim() : '';
+            }
+            if (name) strengthItems.push({ name, desc });
+          }
+        }
+        if (strengthItems.length) {
+          const grid = document.createElement('div');
+          grid.className = 's3-strengths-grid';
+          for (const { name, desc } of strengthItems) {
+            const card = document.createElement('div');
+            card.className = 's3-strength-card';
+            card.innerHTML = `<div class="s3-strength-name">${name}</div>`
+              + (desc ? `<div class="s3-strength-desc">${desc}</div>` : '');
+            grid.appendChild(card);
+          }
+          sec.appendChild(grid);
+        } else {
+          const d = document.createElement('div'); d.className = 's3-portrait-rest';
+          d.innerHTML = marked.parse(rawS2); sec.appendChild(d);
+        }
+        wrap.appendChild(sec);
+      }
+
+      // 3.3 — Shadow cards
+      if (subs['3']) {
+        const sec = makeSection('Теневые паттерны');
+        const rawText = subs['3'];
+        // Parse items: new format (#### headers) or old format (numbered/bulleted lines)
+        let shadowItems = [];
+        const h4Chunks = rawText.split(/^####\s*/m).filter(c => c.trim());
+        if (h4Chunks.length >= 2) {
+          for (const chunk of h4Chunks) {
+            const nl = chunk.indexOf('\n');
+            const name = (nl === -1 ? chunk : chunk.slice(0, nl)).replace(/\*+/g, '').trim();
+            const rest = nl === -1 ? '' : chunk.slice(nl + 1).trim();
+            if (!name) continue;
+            const lessonM = rest.match(/💡\s*Урок[:\s]+(.+)/);
+            shadowItems.push({ name, body: rest.replace(/💡\s*Урок[:\s]+.+/g, '').trim(), lesson: lessonM ? lessonM[1].trim() : '' });
+          }
+        } else {
+          // Old format: each item is on own line starting with number/bullet
+          const lines = rawText.split('\n').filter(l => l.trim().match(/^(\d+\.|[-•*·])/));
+          for (const line of lines) {
+            const t = line.replace(/^[\d.\s•*\-·]+/, '').replace(/\*+/g, '').trim();
+            const lessonM = t.match(/[Уу]чит\s+(.+?)\.?\s*$/);
+            const lesson  = lessonM ? lessonM[1].trim() : '';
+            const bodyPart = t.replace(/[Уу]чит\s+.+$/, '').trim();
+            const dashIdx = bodyPart.search(/[—–]/);
+            let name = bodyPart, body = '';
+            if (dashIdx !== -1) {
+              name = bodyPart.slice(0, dashIdx).replace(/[«»"""'']+/g, '').trim();
+              body = bodyPart.slice(dashIdx + 1).trim();
+            }
+            if (name) shadowItems.push({ name, body, lesson });
+          }
+        }
+        if (shadowItems.length) {
+          const list = document.createElement('div');
+          list.className = 's3-shadows';
+          for (const { name, body, lesson } of shadowItems) {
+            const card = document.createElement('div');
+            card.className = 's3-shadow-card';
+            card.innerHTML = `<div class="s3-shadow-name">« ${name} »</div>`
+              + (body   ? `<div class="s3-shadow-body">${body}</div>` : '')
+              + (lesson ? `<div class="s3-shadow-lesson">💡 ${lesson}</div>` : '');
+            list.appendChild(card);
+          }
+          sec.appendChild(list);
+        } else {
+          const d = document.createElement('div'); d.className = 's3-portrait-rest';
+          d.innerHTML = marked.parse(rawText); sec.appendChild(d);
+        }
+        wrap.appendChild(sec);
+      }
+
+      // 3.4 — Task columns + closing
+      if (subs['4']) {
+        const sec = makeSection('Жизненные задачи');
+        const txt = subs['4'];
+
+        function extractTaskItems(emoji) {
+          const tlines = txt.split('\n');
+          let collecting = false; const items = [];
+          for (const line of tlines) {
+            if (line.includes(emoji)) { collecting = true; continue; }
+            if (!collecting) continue;
+            const t = line.trim();
+            if (t.match(/^[-•*]\s+/)) {
+              items.push(t.replace(/^[-•*]+\s*/, '').replace(/\*+/g, '').trim());
+            } else if (t && !t.match(/^[-•*]/)) break;
+          }
+          return items.filter(l => l.length > 1);
+        }
+
+        const devItems = extractTaskItems('🌱');
+        const relItems = extractTaskItems('🌬');
+        const frmItems = extractTaskItems('💎');
+        const hasTasks = devItems.length || relItems.length || frmItems.length;
+
+        if (hasTasks) {
+          const grid = document.createElement('div');
+          grid.className = 's3-tasks-grid';
+          const cols = [
+            { cls: 's3-task-develop', label: '🌱 Развивай', items: devItems },
+            { cls: 's3-task-release', label: '🌬 Отпусти',  items: relItems },
+            { cls: 's3-task-form',    label: '💎 Формируй', items: frmItems },
+          ];
+          for (const col of cols) {
+            const colEl = document.createElement('div');
+            colEl.className = `s3-task-col ${col.cls}`;
+            const hdr = document.createElement('div');
+            hdr.className = 's3-task-header'; hdr.textContent = col.label;
+            colEl.appendChild(hdr);
+            const ul = document.createElement('ul');
+            col.items.forEach(item => { const li = document.createElement('li'); li.textContent = item; ul.appendChild(li); });
+            colEl.appendChild(ul);
+            grid.appendChild(colEl);
+          }
+          sec.appendChild(grid);
+
+          // Closing paragraph: lines after the last bullet
+          const tlines = txt.split('\n');
+          let lastBullet = -1;
+          tlines.forEach((l, i) => { if (l.trim().match(/^[-•*]/)) lastBullet = i; });
+          if (lastBullet !== -1) {
+            const finalTxt = tlines.slice(lastBullet + 1).join('\n').replace(/\*+/g, '').trim();
+            if (finalTxt) {
+              const fin = document.createElement('div');
+              fin.className = 's3-tasks-final';
+              fin.textContent = finalTxt;
+              sec.appendChild(fin);
+            }
+          }
+        } else {
+          const d = document.createElement('div'); d.className = 's3-portrait-rest';
+          d.innerHTML = marked.parse(txt); sec.appendChild(d);
+        }
+        wrap.appendChild(sec);
+      }
+
+      return wrap;
+    }
+
+    // ── Section 4 renderer ──────────────────────────────────
+    function renderSection4(body) {
+      const wrap = document.createElement('div');
+      wrap.className = 's4-container';
+
+      const SPHERE_META = [
+        { key: 'люб',  icon: '❤',   color: '#e87ea8' },
+        { key: 'ден',  icon: '💰',  color: '#e8c86e' },
+        { key: 'кар',  icon: '💼',  color: '#78aae6' },
+        { key: 'сем',  icon: '👨‍👩‍👧', color: '#a78ee8' },
+        { key: 'здор', icon: '🏥',  color: '#78c87a' },
+        { key: 'само', icon: '🌱',  color: '#e8a46e' },
+        { key: 'твор', icon: '🎨',  color: '#6ee8d4' },
+      ];
+
+      // Separate spheres from timeline
+      const tlIdx = body.search(/^#{0,4}\s*ТАЙМЛАЙН/im);
+      const spheresBody  = tlIdx !== -1 ? body.slice(0, tlIdx) : body;
+      const timelineBody = tlIdx !== -1 ? body.slice(tlIdx)    : '';
+
+      // Sphere cards — try #### format first, fall back to numbered list
+      function parseSphereChunks(text) {
+        const h4 = text.split(/^####\s*/m).filter(c => c.trim());
+        if (h4.length >= 2) return h4.map(chunk => {
+          const nl = chunk.indexOf('\n');
+          return { title: (nl === -1 ? chunk : chunk.slice(0, nl)).replace(/\*+/g, '').trim(), rest: nl === -1 ? '' : chunk.slice(nl + 1).trim() };
+        });
+        // Old format: split by "N. Название" at start of line
+        const parts = text.split(/(?=^\d+\.\s)/m).filter(p => p.trim());
+        if (parts.length >= 2) return parts.map(part => {
+          const nl = part.indexOf('\n');
+          return { title: (nl === -1 ? part : part.slice(0, nl)).replace(/^\d+\.\s*/, '').trim(), rest: nl === -1 ? '' : part.slice(nl + 1).trim() };
+        });
+        return [];
+      }
+
+      const chunks = parseSphereChunks(spheresBody);
+      if (chunks.length) {
+        const grid = document.createElement('div');
+        grid.className = 's4-spheres-grid';
+        for (const { title, rest } of chunks) {
+          if (!title) continue;
+          const meta = SPHERE_META.find(m => title.toLowerCase().includes(m.key))
+                    || { icon: '✦', color: '#c4956a' };
+
+          // Known label prefixes used by models after (а)/(б) markers
+          const AB_LABELS = [
+            'Натальный потенциал', 'Природный потенциал', 'Текущий фон',
+            'Натально', 'Натальная', 'Потенциал',
+          ];
+          // Strip (x) marker + optional bold + optional known label prefix
+          const stripABLabel = (s, letter) => {
+            let r = s
+              .replace(new RegExp(`\\*{0,2}\\s*\\(${letter}\\)\\s*\\*{0,2}`, 'gi'), '')
+              .replace(/\*+/g, '').trim();
+            // Remove first line if it's a pure label (short, no sentence punctuation, no brackets)
+            const nl = r.indexOf('\n');
+            if (nl > 0) {
+              const fl = r.slice(0, nl).trim();
+              const isLabel = fl.endsWith(':') || fl.endsWith('：') ||
+                (fl.length < 40 && !/[.!?]/.test(fl) && !/[()（）]/.test(fl));
+              if (isLabel) return r.slice(nl + 1).trim();
+            }
+            // Strip known label prefix (e.g. "Натальный потенциал. text" or "Натально text")
+            for (const lbl of AB_LABELS) {
+              const re = new RegExp('^' + lbl + '[.：:,]?\\s+', 'i');
+              const stripped = r.replace(re, '').trim();
+              if (stripped !== r) return stripped;
+            }
+            // Strip any short (< 35 chars) prefix ending with colon/period if followed by content
+            const m = r.match(/^([А-Яа-яёЁ][А-Яа-яёЁ\s]{0,33})[.:：]\s+(\S)/);
+            if (m) return r.slice(m.index + m[1].length + 2).trim();
+            return r;
+          };
+          const bSep = rest.search(/\*{0,2}\(б\)/i);
+          const aTxt = bSep !== -1 ? stripABLabel(rest.slice(0, bSep), 'а') : stripABLabel(rest, 'а') || rest.replace(/\*+/g,'').trim();
+          const bTxt = bSep !== -1 ? stripABLabel(rest.slice(bSep), 'б') : '';
+
+          const card = document.createElement('div');
+          card.className = 's4-sphere-card';
+          card.style.setProperty('--sphere-color', meta.color);
+          const hdr = document.createElement('div');
+          hdr.className = 's4-sphere-header';
+          hdr.innerHTML = `<span class="s4-sphere-icon">${meta.icon}</span><span class="s4-sphere-title">${title}</span>`;
+          card.appendChild(hdr);
+          if (aTxt) {
+            const p = document.createElement('div'); p.className = 's4-sphere-part';
+            p.innerHTML = `<div class="s4-part-label">Природный потенциал</div><div class="s4-part-text">${aTxt}</div>`;
+            card.appendChild(p);
+          }
+          if (bTxt) {
+            const p = document.createElement('div'); p.className = 's4-sphere-part';
+            p.innerHTML = `<div class="s4-part-label">Сейчас</div><div class="s4-part-text">${bTxt}</div>`;
+            card.appendChild(p);
+          }
+          grid.appendChild(card);
+        }
+        wrap.appendChild(grid);
+      }
+
+      // Timeline
+      if (timelineBody) {
+        const tl = document.createElement('div');
+        tl.className = 's4-timeline';
+        const tlTitle = document.createElement('div');
+        tlTitle.className = 's4-timeline-title';
+        tlTitle.textContent = 'Таймлайн ближайших 12 месяцев';
+        tl.appendChild(tlTitle);
+        const itemsEl = document.createElement('div');
+        itemsEl.className = 's4-timeline-items';
+        // Match bullet lines OR "Q3 2026:" style lines
+        const bulletRE = /^(?:[•\-\*]\s*|(?:Q\d|[IVX]+\s+кв\.?)\s*\d{4}\s*:?\s*)(.+)/gm;
+        let m;
+        while ((m = bulletRE.exec(timelineBody)) !== null) {
+          const full = m[0].replace(/\*+/g, '').trim();
+          const raw  = m[1].replace(/\*+/g, '').trim();
+          // Label: "Q3 2026" / "III кв. 2026" or before dash
+          const qM = full.match(/^((?:Q\d|[IVX]+\s+кв\.?)\s*\d{4})/i);
+          const dashIdx = !qM ? raw.search(/[–—]/) : -1;
+          const label = qM ? qM[1] : (dashIdx !== -1 ? raw.slice(0, dashIdx).trim() : '');
+          const text  = qM ? full.replace(/^[^:]+:\s*/, '') : (dashIdx !== -1 ? raw.slice(dashIdx + 1).trim() : raw);
+          const item = document.createElement('div');
+          item.className = 's4-timeline-item';
+          item.innerHTML = `<div class="s4-timeline-left"><div class="s4-timeline-dot"></div><div class="s4-timeline-vline"></div></div>`
+            + `<div class="s4-timeline-content">${label ? `<div class="s4-timeline-label">${label}</div>` : ''}<div class="s4-timeline-text">${text}</div></div>`;
+          itemsEl.appendChild(item);
+        }
+        tl.appendChild(itemsEl);
+        wrap.appendChild(tl);
+      }
+
+      return wrap;
+    }
+
+    function renderBlocks(fullText) {
+      // Hide static v2 template, show dynamic blocks container
+      document.getElementById('resultBlocksWrap').hidden = true;
+      const blocksEl = document.getElementById('resultBlocks');
+      blocksEl.innerHTML = '';
+
+      // Отсекаем преамбулу до первого реального раздела
+      const preambleRE = new RegExp('[' + BOX + ']{3,}|^#{1,2}\\s+РАЗДЕЛ|^РАЗДЕЛ\\s+\\d', 'm');
+      const firstSepIdx = fullText.search(preambleRE);
+      const text = firstSepIdx !== -1 ? fullText.slice(firstSepIdx) : fullText;
+
+      const lines    = text.split('\n');
+      const sections = [];
+      let currentTitle = null;
+      let currentLines = [];
+
+      for (const line of lines) {
+        const t = line.trim();
+
+        // Чистые разделители — пропускаем, они не несут контента
+        if (isPureSep(t)) continue;
+
+        // Проверяем, является ли строка заголовком раздела
+        const title = getSectionTitle(line);
+        if (title) {
+          // Сохраняем предыдущий раздел
+          if (currentLines.join('').trim()) {
+            sections.push({ title: currentTitle, body: currentLines.join('\n').trim() });
+          }
+          currentTitle = cleanTitle(title);
+          currentLines = [];
+          continue;
+        }
+
+        currentLines.push(line);
+      }
+
+      // Последний раздел
+      if (currentLines.join('').trim()) {
+        sections.push({ title: currentTitle, body: currentLines.join('\n').trim() });
+      }
+
+      // Нет секций — рендерим как поток
+      if (sections.length === 0) {
+        const div = document.createElement('div');
+        div.className = 'result-stream-block';
+        div.innerHTML = marked.parse(text.trim());
+        blocksEl.appendChild(div);
+        return;
+      }
+
+      const wrap = document.createElement('div');
+      wrap.className = 'result-blocks-wrap';
+
+      sections.forEach(({ title, body }) => {
+        if (!body.trim()) return;
+        const block = document.createElement('div');
+        block.className = 'result-block';
+        if (title) {
+          const titleEl = document.createElement('div');
+          titleEl.className = 'result-block-title';
+          titleEl.textContent = title;
+          block.appendChild(titleEl);
+        }
+        const bodyEl = document.createElement('div');
+        const isS3 = title && /РАЗДЕЛ\s*3\b/i.test(title);
+        const isS4 = title && /РАЗДЕЛ\s*4\b/i.test(title);
+        if (isS3) {
+          bodyEl.className = 'result-block-body result-block-body--custom';
+          bodyEl.appendChild(renderSection3(body));
+        } else if (isS4) {
+          bodyEl.className = 'result-block-body result-block-body--custom';
+          bodyEl.appendChild(renderSection4(body));
+        } else {
+          bodyEl.className = 'result-block-body';
+          bodyEl.innerHTML = marked.parse(body);
+        }
+        block.appendChild(bodyEl);
+        wrap.appendChild(block);
+      });
+
+      blocksEl.appendChild(wrap);
+    }
+
+    // ── fillTemplate: заполняем статичный шаблон из JSON ──────────
+    const SPHERE_META_V2 = [
+      { key: 'love',          icon: '❤',    color: '#e87ea8', label: 'Любовь и отношения' },
+      { key: 'love_patterns', icon: '💞',   color: '#f0709a', label: 'Как ты любишь' },
+      { key: 'money',         icon: '💰',   color: '#e8c86e', label: 'Деньги и материальное' },
+      { key: 'career',        icon: '💼',   color: '#78aae6', label: 'Карьера и призвание' },
+      { key: 'family',        icon: '👨‍👩‍👧',  color: '#a78ee8', label: 'Семья и род' },
+      { key: 'health',        icon: '🏥',   color: '#78c87a', label: 'Здоровье и тело' },
+      { key: 'growth',        icon: '🌱',   color: '#e8a46e', label: 'Саморазвитие' },
+      { key: 'creative',      icon: '🎨',   color: '#6ee8d4', label: 'Творчество' },
+    ];
+
+    const S5_ROWS = [
+      { key: 'love',     icon: '❤' },
+      { key: 'money',    icon: '💰' },
+      { key: 'career',   icon: '💼' },
+      { key: 'family',   icon: '👨‍👩‍👧' },
+      { key: 'health',   icon: '🏥' },
+      { key: 'growth',   icon: '🌱' },
+      { key: 'creative', icon: '🎨' },
+    ];
+
+    const S5_PEAKS_META = [
+      { key: 'love',   icon: '❤',  label: 'Любовь' },
+      { key: 'money',  icon: '💰', label: 'Деньги' },
+      { key: 'career', icon: '💼', label: 'Карьера' },
+      { key: 'health', icon: '🏥', label: 'Здоровье' },
+      { key: 'growth', icon: '🌱', label: 'Рост' },
+    ];
+
+    function fillTemplate(data) {
+      document.getElementById('resultBlocks').innerHTML = '';
+      document.getElementById('resultBlocksWrap').hidden = false;
+
+      // ── Секция 1 ────────────────────────────────────────────────
+      document.getElementById('s1Body').innerHTML = marked.parse(data.section1 || '');
+
+      // ── Секция 3: Портрет ───────────────────────────────────────
+      const s3 = data.section3 || {};
+      document.getElementById('s3Portrait').innerHTML = marked.parse(s3.portrait || '');
+
+      const strengthsEl = document.getElementById('s3Strengths');
+      strengthsEl.innerHTML = '';
+      (s3.strengths || []).forEach(({ name, desc }) => {
+        const card = document.createElement('div');
+        card.className = 's3-strength-card';
+        card.innerHTML = `<div class="s3-strength-name">${escHtml(name)}</div>`
+          + (desc ? `<div class="s3-strength-desc">${escHtml(desc)}</div>` : '');
+        strengthsEl.appendChild(card);
+      });
+
+      const shadowsEl = document.getElementById('s3Shadows');
+      shadowsEl.innerHTML = '';
+      (s3.shadows || []).forEach(({ name, body, lesson }) => {
+        const card = document.createElement('div');
+        card.className = 's3-shadow-card';
+        card.innerHTML = `<div class="s3-shadow-name">« ${escHtml(name)} »</div>`
+          + (body   ? `<div class="s3-shadow-body">${escHtml(body)}</div>` : '')
+          + (lesson ? `<div class="s3-shadow-lesson">💡 ${escHtml(lesson)}</div>` : '');
+        shadowsEl.appendChild(card);
+      });
+
+      const tasksEl = document.getElementById('s3Tasks');
+      tasksEl.innerHTML = '';
+      const tasks = s3.tasks || {};
+      [
+        { cls: 's3-task-develop', label: '🌱 Развивай', items: tasks.develop || [] },
+        { cls: 's3-task-release', label: '🌬 Отпусти',  items: tasks.release || [] },
+        { cls: 's3-task-form',    label: '💎 Формируй', items: tasks.form    || [] },
+      ].forEach(({ cls, label, items }) => {
+        const col = document.createElement('div');
+        col.className = `s3-task-col ${cls}`;
+        const hdr = document.createElement('div');
+        hdr.className = 's3-task-header';
+        hdr.textContent = label;
+        col.appendChild(hdr);
+        const ul = document.createElement('ul');
+        items.forEach(item => {
+          const li = document.createElement('li');
+          li.textContent = item;
+          ul.appendChild(li);
+        });
+        col.appendChild(ul);
+        tasksEl.appendChild(col);
+      });
+      const summaryEl = document.getElementById('s3TasksSummary');
+      summaryEl.textContent = tasks.summary || '';
+      summaryEl.hidden = !tasks.summary;
+
+      // ── Секция 4: Сферы жизни ───────────────────────────────────
+      const SPHERE_EXTRA = {
+        love:    [
+          { key: 'partner_type', label: 'Идеальный партнёр' },
+          { key: 'patterns',     label: 'Паттерны' },
+          { key: 'tendency',     label: 'Склонность' },
+        ],
+        love_patterns: [
+          { key: 'how_you_love',    label: 'Как ты любишь' },
+          { key: 'what_you_need',   label: 'Что тебе нужно' },
+          { key: 'triggers',        label: 'Что задевает' },
+          { key: 'shadow_in_love',  label: 'Теневой паттерн' },
+          { key: 'growth_in_love',  label: 'Зона роста' },
+        ],
+        money:   [
+          { key: 'earning_style', label: 'Способ зарабатывать' },
+          { key: 'accumulation',  label: 'Накопление' },
+          { key: 'risk',          label: 'Риск' },
+        ],
+        career:  [
+          { key: 'professions',  label: 'Подходящие профессии', isList: true },
+          { key: 'work_style',   label: 'Стиль работы' },
+          { key: 'entrepreneur', label: 'Предпринимательство' },
+        ],
+        family:  [
+          { key: 'parents',  label: 'Родители' },
+          { key: 'children', label: 'Дети' },
+          { key: 'siblings', label: 'Братья и сёстры' },
+        ],
+        health:  [
+          { key: 'organs',    label: 'Уязвимые зоны' },
+          { key: 'lifestyle', label: 'Образ жизни' },
+        ],
+      };
+
+      const s4 = data.section4 || {};
+      const spheresEl = document.getElementById('s4Spheres');
+      spheresEl.innerHTML = '';
+      SPHERE_META_V2.forEach(({ key, icon, color, label }) => {
+        const sphere = s4[key] || {};
+        const card = document.createElement('div');
+        card.className = 's4-sphere-card';
+        card.style.setProperty('--sphere-color', color);
+        const hdr = document.createElement('div');
+        hdr.className = 's4-sphere-header';
+        hdr.innerHTML = `<span class="s4-sphere-icon">${icon}</span><span class="s4-sphere-title">${label}</span>`;
+        card.appendChild(hdr);
+        if (sphere.natural) {
+          const p = document.createElement('div');
+          p.className = 's4-sphere-part';
+          p.innerHTML = `<div class="s4-part-label">Природный потенциал</div><div class="s4-part-text">${escHtml(sphere.natural)}</div>`;
+          card.appendChild(p);
+        }
+        if (sphere.now) {
+          const p = document.createElement('div');
+          p.className = 's4-sphere-part';
+          p.innerHTML = `<div class="s4-part-label">Сейчас</div><div class="s4-part-text">${escHtml(sphere.now)}</div>`;
+          card.appendChild(p);
+        }
+        (SPHERE_EXTRA[key] || []).forEach(({ key: fk, label: fl, isList }) => {
+          const val = sphere[fk];
+          if (!val || (Array.isArray(val) && !val.length)) return;
+          if (typeof val === 'string' && !val.trim()) return;
+          const p = document.createElement('div');
+          p.className = 's4-sphere-part';
+          if (isList && Array.isArray(val)) {
+            const tags = val.map(t => `<span class="s4-profession-tag">${escHtml(t)}</span>`).join('');
+            p.innerHTML = `<div class="s4-part-label">${fl}</div><div class="s4-professions">${tags}</div>`;
+          } else {
+            p.innerHTML = `<div class="s4-part-label">${fl}</div><div class="s4-part-text">${escHtml(String(val))}</div>`;
+          }
+          card.appendChild(p);
+        });
+        spheresEl.appendChild(card);
+      });
+
+      const tlItemsEl = document.getElementById('s4TimelineItems');
+      tlItemsEl.innerHTML = '';
+      (s4.timeline || []).forEach(({ label, text }) => {
+        const item = document.createElement('div');
+        item.className = 's4-timeline-item';
+        item.innerHTML = `<div class="s4-timeline-left"><div class="s4-timeline-dot"></div><div class="s4-timeline-vline"></div></div>`
+          + `<div class="s4-timeline-content">${label ? `<div class="s4-timeline-label">${escHtml(label)}</div>` : ''}<div class="s4-timeline-text">${escHtml(text)}</div></div>`;
+        tlItemsEl.appendChild(item);
+      });
+
+      // ── Секция 5: Жизненные циклы ───────────────────────────────
+      const s5 = data.section5 || {};
+      const cyclesEl = document.getElementById('s5Cycles');
+      cyclesEl.innerHTML = '';
+      (s5.cycles || []).forEach(cycle => {
+        const cycleEl = document.createElement('div');
+        cycleEl.className = 's5-cycle' + (cycle.is_current ? ' is-current' : '');
+        let html = `<div class="s5-cycle-header">`
+          + `<span class="s5-cycle-range">${escHtml(cycle.range || '')}</span>`
+          + `<span class="s5-cycle-theme">${escHtml(cycle.theme || '')}</span>`
+          + (cycle.is_current ? `<span class="s5-cycle-current-badge">сейчас</span>` : '')
+          + `</div><div class="s5-cycle-rows">`;
+        S5_ROWS.forEach(({ key, icon }) => {
+          if (cycle[key]) {
+            html += `<div class="s5-row"><span class="s5-row-icon">${icon}</span><span class="s5-row-text">${escHtml(cycle[key])}</span></div>`;
+          }
+        });
+        html += `</div>`;
+        cycleEl.innerHTML = html;
+        cyclesEl.appendChild(cycleEl);
+      });
+
+      const peaks = s5.peaks || {};
+      const peaksEl = document.getElementById('s5Peaks');
+      if (Object.keys(peaks).length) {
+        peaksEl.hidden = false;
+        const title = document.createElement('div');
+        title.className = 's5-peaks-title';
+        title.textContent = 'Ключевые пики';
+        const grid = document.createElement('div');
+        grid.className = 's5-peaks-grid';
+        S5_PEAKS_META.forEach(({ key, icon, label }) => {
+          if (!peaks[key]) return;
+          const item = document.createElement('div');
+          item.className = 's5-peak-item';
+          item.innerHTML = `<div class="s5-peak-label">${icon} ${label}</div>`
+            + `<div class="s5-peak-range">${escHtml(peaks[key].range || '')}</div>`
+            + `<div class="s5-peak-reason">${escHtml(peaks[key].reason || '')}</div>`;
+          grid.appendChild(item);
+        });
+        peaksEl.innerHTML = '';
+        peaksEl.appendChild(title);
+        peaksEl.appendChild(grid);
+      }
+
+      const summaryS5El = document.getElementById('s5Summary');
+      summaryS5El.hidden = !s5.current_summary;
+      summaryS5El.textContent = s5.current_summary || '';
+
+      // ── Секция 6: Судьба и предназначение ───────────────────────
+      const s6 = data.section6 || {};
+      const s6Block = document.getElementById('s6Block');
+      const hasS6 = s6.destiny || s6.natural_gifts || s6.work_areas || s6.spiritual || s6.ancestral || s6.directions || (s6.recurring_themes && s6.recurring_themes.length);
+      if (hasS6) {
+        s6Block.hidden = false;
+        document.getElementById('s6Destiny').textContent    = s6.destiny      || '';
+        document.getElementById('s6Gifts').textContent      = s6.natural_gifts || '';
+        document.getElementById('s6Work').textContent       = s6.work_areas    || '';
+        document.getElementById('s6Spiritual').textContent  = s6.spiritual     || '';
+        document.getElementById('s6Ancestral').textContent  = s6.ancestral     || '';
+        document.getElementById('s6Directions').textContent = s6.directions    || '';
+        const themes = s6.recurring_themes || [];
+        if (themes.length) {
+          const wrap = document.getElementById('s6ThemesWrap');
+          const container = document.getElementById('s6Themes');
+          wrap.hidden = false;
+          container.innerHTML = themes.map(t => `<span class="s6-theme-tag">${escHtml(t)}</span>`).join('');
+        }
+      }
+
+      // ── Инсайты ─────────────────────────────────────────────────
+      if (data.insights) {
+        document.getElementById('insightSuperpower').textContent = data.insights.superpower || '—';
+        document.getElementById('insightTrap').textContent       = data.insights.trap       || '—';
+        document.getElementById('insightAdvice').textContent     = data.insights.advice     || '—';
+        document.getElementById('insightsLoading').style.display = 'none';
+        document.getElementById('insightsGrid').style.display    = 'grid';
+      }
+
+      // ── Простыми словами ────────────────────────────────────────
+      if (data.simple) {
+        document.getElementById('decodeSection').style.display  = 'block';
+        document.getElementById('decodeStatusLine').style.display = 'none';
+        document.getElementById('decodeContent').innerHTML = marked.parse(data.simple);
+      }
+    }
+
+    // ── Chart scores ───────────────────────────────────────────────
+    const LC_METRICS = [
+      { key: 'love',     color: '#e87ea8', name: '❤ Любовь' },
+      { key: 'money',    color: '#e8c86e', name: '💰 Деньги' },
+      { key: 'career',   color: '#78aae6', name: '💼 Карьера' },
+      { key: 'family',   color: '#a78ee8', name: '👨‍👩‍👧 Семья' },
+      { key: 'health',   color: '#78c87a', name: '🏥 Здоровье' },
+      { key: 'growth',   color: '#e8a46e', name: '🌱 Рост' },
+      { key: 'creative', color: '#6ee8d4', name: '🎨 Творчество' },
+    ];
+
+    // Все 7 сфер активны по умолчанию
+    let activeMetrics = new Set(LC_METRICS.map(m => m.key));
+
+    async function runChartScores(chartData) {
+      const section  = document.getElementById('lifechartSection');
+      const loading  = document.getElementById('lifechartLoading');
+      const content  = document.getElementById('lifechartContent');
+
+      section.style.display = 'block';
+      loading.style.display = 'flex';
+      content.style.display = 'none';
+
+      if (!chartData) {
+        loading.style.display = 'none';
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/chart-scores', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chartData }),
+        });
+        if (!res.ok) throw new Error('chart-scores failed');
+        const data = await res.json();
+        if (!data.annual || !data.annual.length) throw new Error('no annual data');
+
+        loading.style.display = 'none';
+        content.style.display = 'block';
+        renderMetricToggles();
+        renderLifechart(data.annual);
+
+        // Переключатели метрик
+        document.querySelectorAll('.lc-toggle').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const k = btn.dataset.key;
+            if (activeMetrics.has(k)) {
+              if (activeMetrics.size > 1) { activeMetrics.delete(k); btn.classList.remove('active'); }
+            } else {
+              activeMetrics.add(k); btn.classList.add('active');
+            }
+            renderLifechart(data.annual);
+          });
+        });
+      } catch (e) {
+        console.warn('[chart-scores]', e);
+        loading.style.display = 'none';
+      }
+    }
+
+    function renderMetricToggles() {
+      const legend = document.getElementById('lifechartLegend');
+      legend.innerHTML = '';
+      LC_METRICS.forEach(({ key, color, name }) => {
+        const btn = document.createElement('button');
+        btn.className = 'lc-toggle' + (activeMetrics.has(key) ? ' active' : '');
+        btn.dataset.key = key;
+        btn.style.setProperty('--lc-color', color);
+        btn.textContent = name;
+        legend.appendChild(btn);
+      });
+    }
+
+    function renderLifechart(annual) {
+      const svg = document.getElementById('lifechart');
+      svg.innerHTML = '';
+
+      const W = 720, H = 280;
+      const PAD = { left: 36, right: 16, top: 18, bottom: 48 };
+      const cw = W - PAD.left - PAD.right;
+      const ch = H - PAD.top - PAD.bottom;
+      const n  = annual.length;
+      if (n < 2) return;
+
+      const nowYear = new Date().getFullYear();
+
+      function xPos(i) { return PAD.left + i * cw / (n - 1); }
+      function yPos(v) { return PAD.top + ch - (Math.max(1, Math.min(10, v)) - 1) / 9 * ch; }
+
+      function el(tag, attrs = {}) {
+        const e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+        Object.entries(attrs).forEach(([k, v]) => e.setAttribute(k, v));
+        return e;
+      }
+      function txt(content, attrs = {}) {
+        const t = el('text', attrs);
+        t.textContent = content;
+        return t;
+      }
+
+      // Current year vertical highlight
+      const nowIdx = annual.findIndex(p => p.year === nowYear);
+      if (nowIdx >= 0) {
+        const x = xPos(nowIdx);
+        svg.appendChild(el('rect', {
+          x: x - 10, y: PAD.top, width: 20, height: ch,
+          fill: 'rgba(255,255,255,0.04)', rx: 4
+        }));
+        svg.appendChild(txt('сейчас', {
+          x, y: PAD.top - 5, fill: 'rgba(255,255,255,0.25)',
+          'font-size': '10', 'text-anchor': 'middle', 'font-family': 'sans-serif'
+        }));
+      }
+
+      // Horizontal grid
+      for (let g = 2; g <= 10; g += 2) {
+        const y = yPos(g);
+        svg.appendChild(el('line', {
+          x1: PAD.left, y1: y, x2: W - PAD.right, y2: y,
+          stroke: g === 6 ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.04)',
+          'stroke-dasharray': '3 6'
+        }));
+        svg.appendChild(txt(g, {
+          x: PAD.left - 6, y: y + 4, fill: '#4a4540',
+          'font-size': '10', 'text-anchor': 'end', 'font-family': 'sans-serif'
+        }));
+      }
+
+      // Smooth Catmull-Rom bezier path
+      function smoothPath(points) {
+        if (points.length < 2) return '';
+        const d = [`M ${points[0].x} ${points[0].y}`];
+        for (let i = 1; i < points.length; i++) {
+          const p0 = points[Math.max(i - 2, 0)];
+          const p1 = points[i - 1];
+          const p2 = points[i];
+          const p3 = points[Math.min(i + 1, points.length - 1)];
+          const cp1x = p1.x + (p2.x - p0.x) / 6;
+          const cp1y = p1.y + (p2.y - p0.y) / 6;
+          const cp2x = p2.x - (p3.x - p1.x) / 6;
+          const cp2y = p2.y - (p3.y - p1.y) / 6;
+          d.push(`C ${cp1x} ${cp1y} ${cp2x} ${cp2y} ${p2.x} ${p2.y}`);
+        }
+        return d.join(' ');
+      }
+
+      // Lines per active metric
+      const visibleMetrics = LC_METRICS.filter(m => activeMetrics.has(m.key));
+
+      visibleMetrics.forEach(({ key, color }) => {
+        const points = annual.map((p, i) => ({ x: xPos(i), y: yPos(p[key] ?? 5) }));
+        const path = el('path', {
+          d: smoothPath(points), fill: 'none',
+          stroke: color, 'stroke-width': '1.8',
+          'stroke-linecap': 'round',
+          opacity: '0.85'
+        });
+        svg.appendChild(path);
+      });
+
+      // X-axis labels — show every ~5 years
+      const step = n > 25 ? 5 : n > 15 ? 3 : 1;
+      annual.forEach((p, i) => {
+        if (i % step !== 0 && i !== n - 1) return;
+        const x = xPos(i);
+        svg.appendChild(txt(`${p.year}`, {
+          x, y: H - PAD.bottom + 14, fill: '#6a6058',
+          'font-size': '10', 'text-anchor': 'middle', 'font-family': 'sans-serif'
+        }));
+        svg.appendChild(txt(`${p.age}л`, {
+          x, y: H - PAD.bottom + 26, fill: '#4a4540',
+          'font-size': '9', 'text-anchor': 'middle', 'font-family': 'sans-serif'
+        }));
+      });
+
+      // X-axis baseline
+      svg.appendChild(el('line', {
+        x1: PAD.left, y1: H - PAD.bottom,
+        x2: W - PAD.right, y2: H - PAD.bottom,
+        stroke: 'rgba(255,255,255,0.08)'
+      }));
+    }
+
+    async function runInsights({ analysisText }) {
+      try {
+        const res = await fetch('/api/insights', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ analysisText, provider: PROVIDER, model: MODEL }),
+        });
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        document.getElementById('insightSuperpower').textContent = data.superpower || '—';
+        document.getElementById('insightTrap').textContent       = data.trap       || '—';
+        document.getElementById('insightAdvice').textContent     = data.advice     || '—';
+        document.getElementById('insightsLoading').style.display = 'none';
+        document.getElementById('insightsGrid').style.display    = 'grid';
+      } catch {
+        document.getElementById('insightsLoading').style.display = 'none';
+      }
+    }
+
+    function setDecodeStatus(state, text) {
+      const line = document.getElementById('decodeStatusLine');
+      const dot  = document.getElementById('decodeStatusDot');
+      const txt  = document.getElementById('decodeStatusText');
+      if (!text) { line.style.display = 'none'; return; }
+      line.style.display = 'flex';
+      dot.className = 'status-dot ' + state;
+      txt.textContent = text;
+    }
+
+    async function runDecode(analysisText, logFile = null) {
+      const section  = document.getElementById('decodeSection');
+      const content  = document.getElementById('decodeContent');
+
+      section.style.display = 'block';
+      content.textContent = '';
+      setDecodeStatus('thinking', 'Готовлю расшифровку...');
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      const cursor = document.createElement('span');
+      cursor.className = 'typing-cursor';
+
+      try {
+        const response = await fetch('/api/decode', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ analysisText, provider: PROVIDER, model: MODEL }),
+        });
+
+        if (!response.ok) throw new Error('Ошибка расшифровки');
+
+        const reader  = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        let firstChunk = true;
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop();
+
+          for (const line of lines) {
+            if (!line.startsWith('data: ')) continue;
+            const raw = line.slice(6);
+            if (raw === '[DONE]') {
+              cursor.remove();
+              setDecodeStatus('done', 'Расшифровка готова');
+              if (logFile) {
+                fetch('/api/log-append', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ logFile, section: 'Простыми словами', content: content.textContent }),
+                }).catch(() => {});
+              }
+              break;
+            }
+            try {
+              const parsed = JSON.parse(raw);
+              if (parsed.error) throw new Error(parsed.error);
+              if (parsed.text) {
+                if (firstChunk) {
+                  firstChunk = false;
+                  content.appendChild(cursor);
+                  setDecodeStatus('streaming', 'Перевожу на простой язык...');
+                }
+                cursor.remove();
+                content.insertAdjacentText('beforeend', parsed.text);
+                content.appendChild(cursor);
+              }
+            } catch {}
+          }
+        }
+      } catch (err) {
+        setDecodeStatus('error', 'Ошибка расшифровки: ' + err.message);
+      }
+    }
+  </script>
+
+  <!-- ── DEV MOCK PANEL ─────────────────────────────────────── -->
+  <style>
+    #devPanel {
+      position: fixed; bottom: 18px; right: 18px; z-index: 9999;
+      font-family: 'SF Mono', monospace; font-size: 12px;
+      display: none;
+    }
+    #devToggle {
+      background: #1a1f2e; border: 1px solid #3a4060; color: #9ecc80;
+      padding: 6px 12px; border-radius: 20px; cursor: pointer;
+      letter-spacing: 1px; font-size: 11px; font-weight: 600;
+    }
+    #devToggle:hover { background: #232840; }
+    #devDrawer {
+      display: none; margin-top: 8px;
+      background: #151a28; border: 1px solid #2e3550;
+      border-radius: 12px; padding: 14px; width: 320px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.6);
+    }
+    #devDrawer.open { display: block; }
+    #devDrawer label { color: #6b7a9e; font-size: 11px; display: block; margin-bottom: 6px; }
+    #devLogSelect {
+      width: 100%; background: #1e2436; border: 1px solid #2e3550;
+      color: #c8c0b4; padding: 7px 10px; border-radius: 8px;
+      font-size: 12px; margin-bottom: 10px;
+    }
+    #devLoadBtn {
+      width: 100%; padding: 8px; border-radius: 8px; border: none;
+      background: #9ecc80; color: #0f1420; font-weight: 700;
+      font-size: 12px; cursor: pointer; letter-spacing: .5px;
+    }
+    #devLoadBtn:hover { background: #b2d99a; }
+    #devStatus { color: #6b7a9e; font-size: 11px; margin-top: 8px; min-height: 16px; }
+  </style>
+
+  <div id="devPanel">
+    <button id="devToggle" onclick="devToggle()">⚡ DEV</button>
+    <div id="devDrawer">
+      <label>Загрузить лог для теста</label>
+      <select id="devLogSelect"><option value="">— загрузка списка…</option></select>
+      <button id="devLoadBtn" onclick="devLoad()">Загрузить и отрендерить</button>
+      <div id="devStatus"></div>
+    </div>
+  </div>
+
+  <script>
+    let devOpen = false;
+    function devToggle() {
+      devOpen = !devOpen;
+      document.getElementById('devDrawer').classList.toggle('open', devOpen);
+      if (devOpen) devFetchList();
+    }
+    async function devFetchList() {
+      try {
+        const logs = await fetch('/api/mock-logs').then(r => r.json());
+        const sel = document.getElementById('devLogSelect');
+        sel.innerHTML = logs.map(l =>
+          `<option value="${l.file}">${l.label}</option>`
+        ).join('');
+      } catch { document.getElementById('devStatus').textContent = 'Ошибка загрузки списка'; }
+    }
+    async function devLoad() {
+      const file = document.getElementById('devLogSelect').value;
+      if (!file) return;
+      const status = document.getElementById('devStatus');
+      status.textContent = 'Загружаю…';
+      try {
+        const data = await fetch('/api/mock-logs/' + encodeURIComponent(file)).then(r => r.json());
+        if (data.error) { status.textContent = 'Ошибка: ' + data.error; return; }
+        const sec = document.getElementById('resultSection');
+        sec.style.display = 'block';
+        sec.classList.add('visible');
+        if (data.interpretation) {
+          fillTemplate(data.interpretation);
+        } else {
+          renderBlocks(data.text || '');
+        }
+        sec.scrollIntoView({ behavior: 'smooth' });
+        status.textContent = '✓ ' + file;
+      } catch (e) { status.textContent = 'Ошибка: ' + e.message; }
+    }
+  </script>
+</body>
+</html>

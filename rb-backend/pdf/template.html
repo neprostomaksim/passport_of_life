@@ -20,16 +20,6 @@
   --gold-pale:  #f0e8d8;
   --accent:     #6b5b8e;
   --accent-pale:#ede9f5;
-  --trine-bg:   #e8f0e4;
-  --trine-fg:   #2d5a1e;
-  --square-bg:  #f5e8e8;
-  --square-fg:  #7a1e1e;
-  --conj-bg:    #e8ecf5;
-  --conj-fg:    #1e2e6e;
-  --sext-bg:    #e8f5f0;
-  --sext-fg:    #1e5a46;
-  --opp-bg:     #f5eee8;
-  --opp-fg:     #6e3e1e;
   --page-w:     794px;
 }
 
@@ -45,6 +35,7 @@ body {
 /* ─── PAGE SHELL ───────────────────────────────────────────── */
 .page {
   width: var(--page-w);
+  height: 1122px; /* strict A4 height */
   margin: 0 auto 2rem;
   background: var(--cream);
   position: relative;
@@ -52,7 +43,6 @@ body {
   box-shadow: 0 8px 48px rgba(0,0,0,.22);
 }
 
-/* decorative corner marks */
 .page::before, .page::after {
   content: '';
   position: absolute;
@@ -67,7 +57,7 @@ body {
 
 /* ─── COVER PAGE ───────────────────────────────────────────── */
 .cover {
-  min-height: 1122px;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -172,8 +162,10 @@ body {
 
 /* ─── INNER PAGE LAYOUT ────────────────────────────────────── */
 .inner {
-  min-height: 1122px;
+  height: 100%;
   padding: 64px 56px 56px;
+  display: flex;
+  flex-direction: column;
 }
 
 .page-header {
@@ -182,7 +174,7 @@ body {
   justify-content: space-between;
   border-bottom: .5px solid var(--gold-light);
   padding-bottom: 12px;
-  margin-bottom: 36px;
+  margin-bottom: 24px;
 }
 
 .page-header-title {
@@ -203,11 +195,11 @@ body {
 .section-label {
   font-size: 10px;
   font-weight: 500;
-  letter-spacing: .3em;
+  letter-spacing: .2em;
   text-transform: uppercase;
   color: var(--gold);
   margin-bottom: 10px;
-  margin-top: 22px;
+  margin-top: 14px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -219,483 +211,405 @@ body {
   background: var(--gold-light);
 }
 
-/* ─── PLANET TABLE ─────────────────────────────────────────── */
-.planet-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-
-.planet-table thead th {
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: .2em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-  padding: 6px 10px;
-  text-align: left;
-  border-bottom: .5px solid var(--cream-dark);
-}
-
-.planet-table tbody tr {
-  border-bottom: .5px solid var(--cream-dark);
-  transition: background .15s;
-}
-
-.planet-table tbody tr:last-child { border-bottom: none; }
-.planet-table tbody tr.highlight { background: var(--gold-pale); }
-
-.planet-table td {
-  padding: 6px 10px;
-  vertical-align: middle;
-}
-
-.planet-glyph {
-  font-size: 16px;
-  width: 28px;
-  text-align: center;
+.text-block {
+  font-size: 13.5px;
+  line-height: 1.7;
   color: var(--ink-mid);
+  margin-bottom: 14px;
 }
 
-.planet-name-col { font-weight: 400; color: var(--ink); }
-.planet-name-col small { font-size: 11px; color: var(--ink-soft); font-weight: 300; }
-.planet-sign-col { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 400; }
-.planet-degree-col { font-size: 12px; color: var(--ink-mid); font-weight: 300; font-variant-numeric: tabular-nums; }
-.planet-house-col {
-  text-align: center;
-  font-size: 11px;
-  color: var(--accent);
-  font-weight: 400;
-}
-
-.planet-house-num {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px; height: 22px;
-  border: .5px solid var(--accent);
-  border-radius: 50%;
-  font-size: 10px;
-  color: var(--accent);
-}
-
-/* ─── ASPECTS ──────────────────────────────────────────────── */
-.aspects-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.aspect-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 12px;
-  border-radius: 3px;
-  font-size: 13px;
-}
-
-.aspect-tag {
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: .12em;
-  padding: 3px 10px;
-  border-radius: 2px;
-  min-width: 88px;
-  text-align: center;
-}
-
-.tag-trine   { background: var(--trine-bg);  color: var(--trine-fg); }
-.tag-square  { background: var(--square-bg); color: var(--square-fg); }
-.tag-conj    { background: var(--conj-bg);   color: var(--conj-fg); }
-.tag-sextile { background: var(--sext-bg);   color: var(--sext-fg); }
-.tag-opp     { background: var(--opp-bg);    color: var(--opp-fg); }
-
-.aspect-planets { font-weight: 400; flex: 0 0 160px; color: var(--ink); }
-.aspect-desc { color: var(--ink-mid); font-size: 12px; flex: 1; }
-.aspect-orb { font-size: 11px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
-
-/* ─── MISSION ──────────────────────────────────────────────── */
-.mission-box {
-  background: var(--gold-pale);
-  border-left: 2px solid var(--gold);
-  padding: 18px 20px;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 17px;
-  font-weight: 300;
-  font-style: italic;
-  line-height: 1.8;
-  color: var(--ink);
-  border-radius: 0 4px 4px 0;
-}
-
-/* ─── STRENGTHS & CHALLENGES ───────────────────────────────── */
-.two-col {
+/* ─── BAZI GRID ────────────────────────────────────────────── */
+.bazi-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
-.trait-list { list-style: none; }
-.trait-list li {
-  display: flex;
-  align-items: flex-start;
-  gap: 9px;
-  font-size: 13px;
-  color: var(--ink-mid);
-  padding: 6px 0;
-  border-bottom: .5px solid var(--cream-dark);
-  line-height: 1.5;
-}
-.trait-list li:last-child { border-bottom: none; }
-
-.dot-gold  { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); flex-shrink: 0; margin-top: 5px; }
-.dot-red   { width: 6px; height: 6px; border-radius: 50%; background: #b06060; flex-shrink: 0; margin-top: 5px; }
-
-.col-header {
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: .25em;
-  text-transform: uppercase;
-  color: var(--gold);
-  margin-bottom: 10px;
-}
-
-/* ─── PERIODS ──────────────────────────────────────────────── */
-.period-domain {
-  margin-bottom: 20px;
-}
-
-.domain-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 10px;
-}
-
-.domain-title {
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: .18em;
-  text-transform: uppercase;
-  color: var(--ink-mid);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.domain-icon { font-size: 14px; }
-
-.score-dots {
-  display: flex;
-  gap: 4px;
-}
-
-.sdot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
+.bazi-pillar {
   background: var(--cream-dark);
-}
-.sdot.on { background: var(--gold); }
-
-.periods-row {
-  display: flex;
-  gap: 6px;
-}
-
-.period-cell {
-  flex: 1;
-  border: .5px solid var(--cream-dark);
-  border-radius: 3px;
-  padding: 8px 9px;
-  background: white;
-  transition: all .2s;
-}
-
-.period-cell.current {
-  border-color: var(--gold);
-  background: var(--gold-pale);
-}
-
-.period-ages {
-  font-size: 10px;
-  color: var(--ink-soft);
-  letter-spacing: .08em;
-  margin-bottom: 3px;
-}
-
-.period-label {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--ink);
-  margin-bottom: 3px;
-}
-
-.period-cell.current .period-label { color: var(--gold); }
-
-.period-desc {
-  font-size: 11px;
-  color: var(--ink-soft);
-  line-height: 1.45;
-}
-
-/* ─── TIMELINE / EVENTS ────────────────────────────────────── */
-.timeline {
+  border: 1px solid var(--gold-light);
+  border-radius: 8px;
+  padding: 10px 6px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.01);
   display: flex;
   flex-direction: column;
-  gap: 0;
-  position: relative;
-  padding-left: 28px;
-}
-
-.timeline::before {
-  content: '';
-  position: absolute;
-  left: 7px;
-  top: 10px;
-  bottom: 10px;
-  width: .5px;
-  background: linear-gradient(to bottom, var(--gold-light), var(--gold-light));
-}
-
-.tl-item {
-  display: flex;
-  gap: 16px;
-  padding: 12px 0;
-  position: relative;
-}
-
-.tl-dot {
-  position: absolute;
-  left: -24px;
-  top: 16px;
-  width: 14px; height: 14px;
-  border-radius: 50%;
-  background: var(--cream);
-  border: 1.5px solid var(--gold);
-  display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 8px;
+}
+
+.bazi-pillar-title {
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: .12em;
   color: var(--gold);
-}
-
-.tl-year {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 22px;
-  font-weight: 400;
-  color: var(--gold);
-  min-width: 52px;
-  line-height: 1;
-  padding-top: 2px;
-}
-
-.tl-content { flex: 1; }
-
-.tl-event {
-  font-size: 14px;
-  font-weight: 400;
-  color: var(--ink);
-  margin-bottom: 3px;
-}
-
-.tl-transit {
-  font-size: 12px;
-  color: var(--ink-soft);
-  line-height: 1.5;
-}
-
-/* ─── FORECAST ─────────────────────────────────────────────── */
-.year-section {
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: .5px solid var(--cream-dark);
-}
-.year-section:last-child { border-bottom: none; margin-bottom: 0; }
-
-.year-heading {
-  display: flex;
-  align-items: baseline;
-  gap: 16px;
+  border-bottom: .5px solid var(--gold-light);
+  width: 100%;
+  padding-bottom: 4px;
   margin-bottom: 8px;
 }
 
-.year-num {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 36px;
-  font-weight: 300;
-  color: var(--gold);
-  line-height: 1;
-}
-
-.year-theme {
-  font-size: 15px;
-  font-style: italic;
-  font-family: 'Cormorant Garamond', serif;
-  color: var(--ink);
+.bazi-stem, .bazi-branch {
+  font-size: 30px;
   font-weight: 400;
+  line-height: 1.1;
+  font-family: serif;
 }
 
-.forecast-grid {
+.bazi-stem-desc, .bazi-branch-desc {
+  font-size: 10px;
+  font-weight: 300;
+  color: var(--ink-mid);
+  margin-bottom: 8px;
+}
+
+.bazi-hidden-title {
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--ink-soft);
+  margin-top: 4px;
+  margin-bottom: 4px;
+  border-top: .5px dashed var(--gold-light);
+  width: 100%;
+  padding-top: 4px;
+}
+
+.hidden-stems-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 100%;
+}
+
+.hidden-stem-item {
+  font-size: 9px;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 1px 4px;
+  border-radius: 2px;
+}
+
+.hidden-stem-item span.hs-char {
+  font-weight: 500;
+  font-family: serif;
+}
+
+/* Element Colors */
+.elem-wood  { color: #2e7d32; }
+.elem-fire  { color: #c62828; }
+.elem-earth { color: #8d6e63; }
+.elem-metal { color: #b89a6a; }
+.elem-water { color: #1565c0; }
+
+.bg-wood  { background: #e8f5e9; color: #2e7d32; }
+.bg-fire  { background: #ffebee; color: #c62828; }
+.bg-earth { background: #efebe9; color: #4e342e; }
+.bg-metal { background: #fdfaf2; color: #a5834f; border: .5px solid var(--gold-light); }
+.bg-water { background: #e3f2fd; color: #0d47a1; }
+
+/* ─── ELEMENTS BALANCE ──────────────────────────────────────── */
+.elements-balance {
+  display: flex;
+  justify-content: space-around;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.element-score {
+  text-align: center;
+  flex: 1;
+  padding: 8px 4px;
+  border-radius: 6px;
+}
+
+.element-name {
+  font-size: 9px;
+  font-weight: 500;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.element-percent {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.dm-strength-box {
+  background: var(--gold-pale);
+  border: 1px solid var(--gold-light);
+  border-radius: 6px;
+  padding: 10px 16px;
+  margin-bottom: 16px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-mid);
+}
+
+/* ─── SPECIAL STARS & INTERACTIONS ─────────────────────────── */
+.stars-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.star-card {
+  background: var(--cream-dark);
+  border-left: 3px solid var(--gold);
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 11.5px;
+  line-height: 1.4;
+}
+
+.star-name {
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 2px;
+}
+
+.two-col-layout {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 20px;
+  flex: 1;
+}
+
+.two-col-equal {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* ─── TASKS GRID ───────────────────────────────────────────── */
+.tasks-grid-layout {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
-  margin-bottom: 8px;
+  margin-top: 10px;
+  margin-bottom: 12px;
 }
 
-.forecast-card {
-  border: .5px solid var(--cream-dark);
-  border-radius: 3px;
-  padding: 8px 10px;
-  background: white;
+.task-column {
+  padding: 10px;
+  border-radius: 6px;
 }
 
-.fc-title {
+.task-column-title {
   font-size: 10px;
-  font-weight: 500;
-  letter-spacing: .2em;
+  font-weight: 600;
   text-transform: uppercase;
-  color: var(--ink-soft);
+  letter-spacing: .08em;
   margin-bottom: 6px;
+  border-bottom: .5px solid currentColor;
+  padding-bottom: 2px;
 }
 
-.fc-desc {
-  font-size: 12px;
-  color: var(--ink-mid);
+.task-list-items {
+  list-style: none;
+  font-size: 11.5px;
+  line-height: 1.4;
+}
+
+.task-list-items li {
+  margin-bottom: 4px;
+  position: relative;
+  padding-left: 8px;
+}
+
+.task-list-items li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: var(--gold);
+}
+
+.task-summary-text {
+  font-size: 12.5px;
   line-height: 1.6;
-  margin-bottom: 8px;
+  font-style: italic;
+  color: var(--ink-soft);
 }
 
-.months-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 3px;
+/* ─── SPHERES CARDS ────────────────────────────────────────── */
+.spheres-grid-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  flex: 1;
 }
 
-.month-good {
-  font-size: 10px;
-  background: var(--trine-bg);
-  color: var(--trine-fg);
-  border-radius: 2px;
-  padding: 2px 6px;
-}
-
-.month-bad {
-  font-size: 10px;
-  background: var(--square-bg);
-  color: var(--square-fg);
-  border-radius: 2px;
-  padding: 2px 6px;
-}
-
-.year-transits {
+.sphere-card-layout {
+  background: var(--cream-dark);
+  border-radius: 8px;
+  padding: 10px 14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.01);
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  margin-bottom: 10px;
 }
 
-.transit-item {
+.sphere-card-header {
   display: flex;
-  gap: 10px;
-  font-size: 12px;
-  align-items: flex-start;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  border-bottom: .5px solid var(--gold-light);
+  padding-bottom: 4px;
 }
 
-.transit-name {
-  font-weight: 400;
-  color: var(--accent);
-  min-width: 180px;
-  flex-shrink: 0;
-}
-
-.transit-inf { color: var(--ink-mid); }
-
-.advice-box {
-  background: var(--accent-pale);
-  border-radius: 3px;
-  padding: 6px 12px;
-  color: var(--accent);
-  font-style: italic;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 14px;
+.sphere-card-body {
+  font-size: 11.5px;
   line-height: 1.5;
+  color: var(--ink-mid);
 }
 
-/* ─── RECTIFICATION ────────────────────────────────────────── */
-.rect-box {
-  border: .5px solid var(--cream-dark);
+.sphere-part-label {
+  font-size: 8.5px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--gold);
+  margin-top: 4px;
+  margin-bottom: 1px;
+}
+
+/* ─── LUCK CYCLES CARDS ─────────────────────────────────────── */
+.luck-cycles-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.luck-cycle-card {
+  background: var(--cream-dark);
+  border-left: 3px solid var(--gold-light);
   border-radius: 4px;
+  padding: 8px 12px;
+}
+
+.luck-cycle-card.current {
+  background: var(--gold-pale);
+  border-left-color: var(--gold);
+}
+
+.luck-cycle-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 500;
+  font-size: 12.5px;
+  margin-bottom: 4px;
+}
+
+.luck-cycle-details {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--ink-mid);
+}
+
+/* ─── GRAPH FORECAST PAGE ──────────────────────────────────── */
+.forecast-chart-container {
+  background: var(--cream-dark);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: center;
+}
+
+.forecast-quarters-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.quarter-card {
+  background: var(--cream-dark);
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--ink-mid);
+}
+
+.quarter-label {
+  font-weight: 600;
+  color: var(--gold);
+  margin-bottom: 2px;
+  border-bottom: .5px solid var(--gold-light);
+  padding-bottom: 2px;
+}
+
+.insights-box-layout {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.insight-card-item {
+  border-radius: 4px;
+  padding: 8px 10px;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.insight-card-item.superpower { background: #e8f5e9; border: .5px solid #a5d6a7; color: #2e7d32; }
+.insight-card-item.trap       { background: #f3e5f5; border: .5px solid #d1c4e9; color: #7b1fa2; }
+.insight-card-item.advice     { background: #fffde7; border: .5px solid #fff59d; color: #f57c00; }
+
+.insight-card-title {
+  font-weight: 600;
+  margin-bottom: 2px;
+  text-transform: uppercase;
+  font-size: 9px;
+  letter-spacing: .05em;
+}
+
+/* ─── PERSONAL MESSAGE ─────────────────────────────────────── */
+.personal-letter {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 17px;
+  line-height: 1.75;
+  font-style: italic;
+  color: var(--ink-mid);
+  padding: 24px 32px;
+  background: radial-gradient(circle at top right, rgba(184,154,106,.05) 0%, transparent 60%);
+  border-radius: 8px;
+  border: .5px solid var(--gold-light);
+  box-shadow: inset 0 0 30px rgba(184,154,106,.02);
+  flex: 1;
   overflow: hidden;
 }
 
-.rect-header {
-  background: var(--cream-dark);
-  padding: 10px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.personal-letter p {
+  margin-bottom: 14px;
 }
 
-.rect-title {
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: .2em;
-  text-transform: uppercase;
-  color: var(--ink-mid);
+.personal-letter p:last-child {
+  margin-bottom: 0;
 }
 
-.rect-badges {
-  display: flex;
-  gap: 12px;
-  font-size: 12px;
-  color: var(--ink-soft);
-}
-
-.rect-badges strong { color: var(--ink); font-weight: 400; }
-
-.rect-note {
-  padding: 12px 16px;
-  font-size: 12px;
-  color: var(--ink-mid);
-  line-height: 1.65;
-  border-bottom: .5px solid var(--cream-dark);
-}
-
-.rect-events { padding: 8px 16px; }
-
-.rect-event-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 9px 0;
-  border-bottom: .5px solid var(--cream-dark);
-  font-size: 12px;
-}
-.rect-event-row:last-child { border-bottom: none; }
-
-.re-phase { font-size: 15px; min-width: 20px; }
-.re-event { font-weight: 400; color: var(--ink); flex: 1; }
-.re-transit { color: var(--ink-soft); font-size: 11px; }
-.re-corr { font-variant-numeric: tabular-nums; color: var(--accent); min-width: 48px; text-align: right; }
-
-/* ─── TIMEZONE NOTE ────────────────────────────────────────── */
 .tz-note {
-  margin-top: 20px;
   font-size: 11px;
   color: var(--ink-soft);
-  border-top: .5px solid var(--cream-dark);
-  padding-top: 10px;
-  letter-spacing: .04em;
+  margin-top: auto;
 }
 
-/* ─── PRINT ────────────────────────────────────────────────── */
+/* ─── PRINT ADJUSTMENTS ────────────────────────────────────── */
 @media print {
   html { background: white; }
   body { padding: 0; background: white; }
   .page {
     width: 210mm;
+    height: 297mm;
     margin: 0;
     box-shadow: none;
     page-break-after: always;
@@ -709,7 +623,7 @@ body {
 
 <!-- ════════════════════════════════════════════════
      PRINT BUTTON (hidden on print)
-═════════════════════════════════════════════════ -->
+ ═════════════════════════════════════════════════ -->
 <div class="no-print" style="text-align:center;margin-bottom:1rem;">
   <button onclick="window.print()"
     style="font-family:'Jost',sans-serif;font-size:13px;letter-spacing:.15em;text-transform:uppercase;
@@ -718,15 +632,11 @@ body {
   </button>
 </div>
 
-<!-- ════════════════════════════════════════════════
-     PAGES — rendered by JS from DATA object below
-═════════════════════════════════════════════════ -->
 <div id="root"></div>
 
 <script>
 /* ╔══════════════════════════════════════════════╗
    ║              ★  DATA OBJECT  ★               ║
-   ║  Замените этот объект для нового клиента     ║
    ╚══════════════════════════════════════════════╝ */
 const DATA = {{DATA_JSON}};
 
@@ -734,32 +644,40 @@ const DATA = {{DATA_JSON}};
    ║           RENDER ENGINE                      ║
    ╚══════════════════════════════════════════════╝ */
 
-const GLYPHS = {
-  sun:'☉', moon:'☽', mercury:'☿', venus:'♀', mars:'♂',
-  jupiter:'♃', saturn:'♄', uranus:'♅', neptune:'♆', pluto:'♇',
-  ascendant:'ASC', mc:'МС', north_node:'☊', chiron:'⚷'
+const STEMS        = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+const STEM_NAMES   = ['Ян-Дерево','Инь-Дерево','Ян-Огонь','Инь-Огонь','Ян-Земля',
+                      'Инь-Земля','Ян-Металл','Инь-Металл','Ян-Вода','Инь-Вода'];
+const STEM_ELEMENT = ['wood','wood','fire','fire','earth','earth','metal','metal','water','water'];
+const BRANCH_ELEMENT = ['water','earth','wood','wood','earth','fire','fire','earth','metal','metal','earth','water'];
+
+const BRANCH_HIDDEN = [
+  [[8, 1.0]],                          // 子 Крыса
+  [[5, 0.6], [8, 0.3], [7, 0.1]],     // 丑 Бык
+  [[0, 0.6], [2, 0.3], [4, 0.1]],     // 寅 Тигр
+  [[1, 1.0]],                          // 卯 Кролик
+  [[4, 0.6], [1, 0.3], [8, 0.1]],     // 辰 Дракон
+  [[2, 0.6], [6, 0.3], [4, 0.1]],     // 巳 Змея
+  [[3, 0.6], [5, 0.4]],               // 午 Лошадь
+  [[5, 0.6], [3, 0.3], [1, 0.1]],     // 未 Коза
+  [[6, 0.6], [9, 0.3], [4, 0.1]],     // 申 Обезьяна
+  [[7, 1.0]],                          // 酉 Петух
+  [[4, 0.6], [3, 0.3], [7, 0.1]],     // 戌 Собака
+  [[9, 0.6], [0, 0.3]]                // 亥 Свинья
+];
+
+const ELEM_RU = {
+  wood: 'Дерево', fire: 'Огонь', earth: 'Земля', metal: 'Металл', water: 'Вода'
 };
 
-const PLANET_NAMES = {
-  sun:'Солнце', moon:'Луна', mercury:'Меркурий', venus:'Венера',
-  mars:'Марс', jupiter:'Юпитер', saturn:'Сатурн', uranus:'Уран',
-  neptune:'Нептун', pluto:'Плутон', ascendant:'Асцендент',
-  mc:'Середина неба', north_node:'Сев. Узел', chiron:'Хирон'
-};
-
-const ASPECT_TAGS = {
-  'ТРИГОН':'tag-trine','КВАДРАТУРА':'tag-square','СОЕДИНЕНИЕ':'tag-conj',
-  'СЕКСТИЛЬ':'tag-sextile','ОППОЗИЦИЯ':'tag-opp'
-};
-
-const DOMAIN_NAMES = {
-  career:'Карьера', love:'Любовь', finance:'Финансы',
-  health:'Здоровье', spirituality:'Духовность'
-};
-
-// current age of client (to highlight period)
-const birthYear = parseInt(DATA.meta.dob.split(' ')[2]);
-const currentAge = 2026 - birthYear;
+const LC_METRICS = [
+  { key: 'love',     color: '#d32f2f', name: '❤ Любовь' },
+  { key: 'money',    color: '#f57c00', name: '💰 Деньги' },
+  { key: 'career',   color: '#1976d2', name: '💼 Карьера' },
+  { key: 'family',   color: '#7b1fa2', name: '👨‍👩‍👧 Семья' },
+  { key: 'health',   color: '#388e3c', name: '✿ Здоровье' },
+  { key: 'growth',   color: '#00796b', name: '🌱 Рост' },
+  { key: 'creative', color: '#e91e63', name: '🎨 Творчество' }
+];
 
 function page(content, num, total) {
   return `
@@ -771,261 +689,666 @@ function page(content, num, total) {
 
 function renderCover(d) {
   const m = d.meta;
-  const corrNote = m.rectification_done
-    ? `<span style="font-size:11px;color:var(--gold)">скорр. ${d.rectification.final_time}</span>` : '';
+  const dmName = d.chart?.dayMaster?.name || 'Ян-Дерево';
+  const animalYear = d.chart?.year?.branchName || 'Крыса';
+  const animalMonth = d.chart?.month?.branchName || 'Бык';
+
   return page(`
   <div class="cover">
-    <div class="cover-stars">✦ ☽ ✦</div>
+    <div class="cover-stars">✦ 算 ✦</div>
     <div class="cover-title">Паспорт Жизни</div>
-    <div class="cover-subtitle">Натальная карта · Периоды · Прогноз</div>
+    <div class="cover-subtitle">Индивидуальная карта Ба-цзы · Анализ личности · Прогноз</div>
     <div class="cover-divider"></div>
     <div class="cover-name">${m.name}</div>
     <div class="cover-meta">
-      ${m.dob} · ${m.tob} ${corrNote}<br>
+      ${m.dob} · ${m.tob}<br>
       <span>${m.pob}</span>
     </div>
     <div class="cover-badges">
       <div class="cover-badge">
-        <div class="badge-label">Асцендент</div>
-        <div class="badge-value">${m.asc_sign}</div>
+        <div class="badge-label">Господин Дня</div>
+        <div class="badge-value">${dmName}</div>
       </div>
       <div class="cover-badge" style="padding:0 24px;border-left:.5px solid var(--gold-light);border-right:.5px solid var(--gold-light)">
-        <div class="badge-label">Солнце</div>
-        <div class="badge-value">${m.sun_sign}</div>
+        <div class="badge-label">Знак Года</div>
+        <div class="badge-value">${animalYear}</div>
       </div>
       <div class="cover-badge">
-        <div class="badge-label">Луна</div>
-        <div class="badge-value">${m.moon_sign}</div>
+        <div class="badge-label">Сезон (Месяц)</div>
+        <div class="badge-value">${animalMonth}</div>
       </div>
     </div>
-    <div class="cover-footer">${m.timezone_note}</div>
+    <div class="cover-footer">${m.timezone_note || ''}</div>
   </div>`, 0, 0);
 }
 
-function renderChartPage(d) {
-  const mainPlanets = ['sun','moon','mercury','venus','mars','jupiter','saturn','uranus','neptune','pluto'];
-  const pointPlanets = ['ascendant','mc','north_node','chiron'];
-
-  function pRow(key, highlight) {
-    const p = d.chart[key];
-    if (!p) return '';
-    const houseCell = p.house !== undefined
-      ? `<td class="planet-house-col"><span class="planet-house-num">${p.house}</span></td>` : '<td></td>';
+function renderHiddenStems(branchIdx) {
+  const list = BRANCH_HIDDEN[branchIdx] || [];
+  return list.map(([sIdx, w]) => {
+    const elType = STEM_ELEMENT[sIdx];
     return `
-    <tr ${highlight ? 'class="highlight"' : ''}>
-      <td class="planet-glyph">${GLYPHS[key]||''}</td>
-      <td class="planet-name-col"><strong>${PLANET_NAMES[key]||key}</strong></td>
-      <td class="planet-sign-col">${p.sign}</td>
-      <td class="planet-degree-col">${p.degree}</td>
-      ${houseCell}
-    </tr>`;
+    <div class="hidden-stem-item bg-${elType}">
+      <span class="hs-char">${STEMS[sIdx]}</span>
+      <span class="hs-name">${STEM_NAMES[sIdx]}</span>
+      <span class="hs-weight">${Math.round(w * 100)}%</span>
+    </div>`;
+  }).join('');
+}
+
+function renderBaziChartPage(d) {
+  const c = d.chart;
+
+  function renderPillarCell(title, pillar) {
+    const stemEl = STEM_ELEMENT[pillar.stemIdx];
+    const branchEl = BRANCH_ELEMENT[pillar.branchIdx];
+    return `
+    <div class="bazi-pillar">
+      <div class="bazi-pillar-title">${title}</div>
+      <div class="bazi-stem elem-${stemEl}">${pillar.stem}</div>
+      <div class="bazi-stem-desc">${pillar.stemName}</div>
+      <div class="bazi-branch elem-${branchEl}">${pillar.branch}</div>
+      <div class="bazi-branch-desc">${pillar.branchName}</div>
+      <div class="bazi-hidden-title">Скрытые</div>
+      <div class="hidden-stems-list">
+        ${renderHiddenStems(pillar.branchIdx)}
+      </div>
+    </div>`;
   }
 
-  const aspectRows = d.key_aspects.map(a => `
-  <div class="aspect-row">
-    <span class="aspect-tag ${ASPECT_TAGS[a.type]||'tag-conj'}">${a.type}</span>
-    <span class="aspect-planets">${a.planets}</span>
-    <span class="aspect-desc">${a.interpretation}</span>
-    <span class="aspect-orb">орб ${a.orb}</span>
-  </div>`).join('');
-
-  return page(`
-  <div class="inner">
-    <div class="page-header">
-      <span class="page-header-title">Натальная карта</span>
-      <span class="page-num">${d.meta.name} · ${d.meta.dob}</span>
-    </div>
-
-    <div class="section-label">Положения планет</div>
-    <table class="planet-table">
-      <thead>
-        <tr>
-          <th></th><th>Планета</th><th>Знак</th><th>Градус</th><th style="text-align:center">Дом</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${mainPlanets.map(k => pRow(k, false)).join('')}
-        <tr><td colspan="5" style="padding:4px 0;border-bottom:.5px solid var(--cream-dark)"></td></tr>
-        ${pointPlanets.map(k => pRow(k, true)).join('')}
-      </tbody>
-    </table>
-
-    <div class="section-label">Жизненное предназначение</div>
-    <div class="mission-box">${d.life_mission}</div>
-
-    <div class="tz-note">Часовой пояс: ${d.meta.timezone_note}</div>
-  </div>`, 2, 6);
-}
-
-function renderAspectsPage(d) {
-  const aspectRows = d.key_aspects.map(a => `
-  <div class="aspect-row">
-    <span class="aspect-tag ${ASPECT_TAGS[a.type]||'tag-conj'}">${a.type}</span>
-    <span class="aspect-planets">${a.planets}</span>
-    <span class="aspect-desc">${a.interpretation}</span>
-    <span class="aspect-orb">орб ${a.orb}</span>
-  </div>`).join('');
-
-  return page(`
-  <div class="inner">
-    <div class="page-header">
-      <span class="page-header-title">Аспекты и Личность</span>
-      <span class="page-num">${d.meta.name} · Аспектные связи</span>
-    </div>
-
-    <div class="section-label">Ключевые аспекты</div>
-    <div class="aspects-grid">${aspectRows}</div>
-
-    <div class="section-label">Профиль личности</div>
-    <div class="two-col">
-      <div>
-        <div class="col-header">Сильные стороны</div>
-        <ul class="trait-list">
-          ${d.strengths.map(s=>`<li><span class="dot-gold"></span>${s}</li>`).join('')}
-        </ul>
-      </div>
-      <div>
-        <div class="col-header">Вызовы и уроки</div>
-        <ul class="trait-list">
-          ${d.challenges.map(c=>`<li><span class="dot-red"></span>${c}</li>`).join('')}
-        </ul>
-      </div>
-    </div>
-  </div>`, 3, 6);
-}
-
-function renderPeriodsPage(d) {
-  const domainKeys = ['career','love','finance','health','spirituality'];
-
-  const domainsHtml = domainKeys.map(key => {
-    const dom = d.life_periods[key];
-    const dots = Array.from({length:10},(_,i)=>`<span class="sdot ${i<dom.score?'on':''}"></span>`).join('');
-    const cells = dom.periods.map(p => {
-      const [a,b] = p.ages.split('-').map(Number);
-      const isCur = currentAge >= a && currentAge < b;
-      return `
-      <div class="period-cell ${isCur?'current':''}">
-        <div class="period-ages">${p.ages}</div>
-        <div class="period-label">${p.label}</div>
-        <div class="period-desc">${p.description}</div>
-      </div>`;
-    }).join('');
+  const balances = Object.entries(c.elementBalance).map(([name, pct]) => {
+    let elType = 'wood';
+    if (name === 'Огонь') elType = 'fire';
+    if (name === 'Земля') elType = 'earth';
+    if (name === 'Металл') elType = 'metal';
+    if (name === 'Вода') elType = 'water';
     return `
-    <div class="period-domain">
-      <div class="domain-header">
-        <div class="domain-title"><span class="domain-icon">${dom.icon||'◈'}</span>${DOMAIN_NAMES[key]}</div>
-        <div class="score-dots">${dots}</div>
-      </div>
-      <div class="periods-row">${cells}</div>
+    <div class="element-score bg-${elType}">
+      <div class="element-name">${name}</div>
+      <div class="element-percent">${pct}%</div>
     </div>`;
   }).join('');
 
   return page(`
   <div class="inner">
     <div class="page-header">
-      <span class="page-header-title">Паспорт жизненных периодов</span>
-      <span class="page-num">${d.meta.name} · 7-летние циклы Сатурна</span>
+      <span class="page-header-title">Карта Судьбы Ба-цзы</span>
+      <span class="page-num">${d.meta.name} · Четыре Столпа</span>
     </div>
-    ${domainsHtml}
-    <div class="tz-note" style="margin-top:12px">Периоды рассчитаны на основе вторичных прогрессий и транзитов Сатурна и Юпитера · Выделен текущий цикл</div>
-  </div>`, 4, 6);
+
+    <div class="section-label">Четыре Столпа Судьбы (Натальная карта)</div>
+    <div class="bazi-grid">
+      ${renderPillarCell('Столб Часа', c.hour)}
+      ${renderPillarCell('Столб Дня', c.day)}
+      ${renderPillarCell('Столб Месяца', c.month)}
+      ${renderPillarCell('Столб Года', c.year)}
+    </div>
+
+    <div class="section-label">Баланс Пяти Стихий</div>
+    <div class="elements-balance">${balances}</div>
+
+    <div class="dm-strength-box">
+      <strong>Господин дня:</strong> ${c.dayMaster.stem} (${c.dayMaster.name}). 
+      <strong>Личная сила:</strong> ${c.dayMasterStrength.label} (балл: ${c.dayMasterStrength.score}). 
+      Сезонный фон ${ELEM_RU[c.dayMasterStrength.seasonElem] || c.dayMasterStrength.seasonElem} находится в состоянии "${c.dayMasterStrength.monthStatus}".<br/>
+      <strong>Благоприятные стихии:</strong> ${c.dayMasterStrength.favorable.join(', ')}.<br/>
+      <strong>Ослабляющие стихии:</strong> ${c.dayMasterStrength.unfavorable.join(', ')}.
+    </div>
+
+    <div class="section-label">Общая картина судьбы</div>
+    <div class="text-block" style="text-align:justify;margin-bottom:0;">
+      ${d.section1 || 'Детальное описание судьбы формируется...'}
+    </div>
+  </div>`, 1, 8);
 }
 
-function renderForecastPage(d) {
-  const years = d.yearly_forecast_next3.map(y => {
-    const transits = y.key_transits.map(t=>`
-    <div class="transit-item">
-      <span class="transit-name">${t.transit}</span>
-      <span class="transit-inf">${t.influence}</span>
-    </div>`).join('');
+function renderProfilePage(d) {
+  const s3 = d.section3 || {};
+  const tasks = s3.tasks || {};
 
-    function card(title, obj) {
-      const good = (obj.best_months||[]).map(m=>`<span class="month-good">${m}</span>`).join('');
-      const bad  = (obj.challenging_months||[]).map(m=>`<span class="month-bad">${m}</span>`).join('');
-      return `
-      <div class="forecast-card">
-        <div class="fc-title">${title}</div>
-        <div class="fc-desc">${obj.description}</div>
-        <div class="months-row">${good}${bad}</div>
-      </div>`;
-    }
-
-    return `
-    <div class="year-section">
-      <div class="year-heading">
-        <span class="year-num">${y.year}</span>
-        <span class="year-theme">${y.theme}</span>
-      </div>
-      <div class="year-transits">${transits}</div>
-      <div class="forecast-grid">
-        ${card('Карьера', y.career)}
-        ${card('Личная жизнь', y.personal_life)}
-        ${card('Здоровье', y.health)}
-      </div>
-      <div class="advice-box">${y.advice}</div>
-    </div>`;
-  }).join('');
-
-  return page(`
-  <div class="inner">
-    <div class="page-header">
-      <span class="page-header-title">Прогноз на 3 года</span>
-      <span class="page-num">${d.meta.name} · 2026–2028</span>
-    </div>
-
-    <div class="section-label">Прогноз на 3 года</div>
-    ${years}
-  </div>`, 5, 6);
-}
-
-function renderRectificationPage(d) {
-  // key events timeline
-  const tlItems = (d.key_events||[]).map(e=>`
-  <div class="tl-item">
-    <div class="tl-dot">${e.phase}</div>
-    <div class="tl-year">${e.year}</div>
-    <div class="tl-content">
-      <div class="tl-event">${e.event}</div>
-      <div class="tl-transit">${e.transit}</div>
-    </div>
-  </div>`).join('');
-
-  // rectification block
-  const rect = d.rectification || { needed: false, original_time: '—', final_time: '—', correction_minutes: 0, confidence: '—', explanation: '—', events_analysis: [] };
-  const evRows = (rect.events_analysis||[]).map(e=>`
-  <div class="rect-event-row">
-    <span class="re-phase">${e.phase}</span>
-    <span class="re-event">${e.event}</span>
-    <span class="re-transit">${e.matching_transit}</span>
-    <span class="re-corr">${e.time_correction}</span>
+  const starsHtml = (d.chart.specialStars || []).map(s => `
+  <div class="star-card">
+    <div class="star-name">${s.name}</div>
+    <div>${s.meaning}</div>
   </div>`).join('');
 
   return page(`
   <div class="inner">
     <div class="page-header">
-      <span class="page-header-title">События и Ректификация</span>
-      <span class="page-num">${d.meta.name} · Уточнение времени</span>
+      <span class="page-header-title">Профиль личности и Звёзды</span>
+      <span class="page-num">${d.meta.name} · Психологический портрет</span>
     </div>
 
-    ${tlItems ? `
-    <div class="section-label">Ключевые события</div>
-    <div class="timeline">${tlItems}</div>` : ''}
+    <div class="two-col-layout">
+      <div>
+        <div class="section-label">Психологический портрет</div>
+        <div class="text-block" style="font-size:12.5px;text-align:justify;">
+          ${s3.portrait || 'Описание характера...'}
+        </div>
 
-    <div class="section-label">Ректификация времени рождения</div>
-    <div class="rect-box">
-      <div class="rect-header">
-        <span class="rect-title">Уточнение времени рождения</span>
-        <div class="rect-badges">
-          <span>Исходное: <strong>${rect.original_time}</strong></span>
-          <span>Скорр.: <strong>${rect.final_time}</strong></span>
-          <span>Коррекция: <strong>${rect.correction_minutes > 0 ? '+' : ''}${rect.correction_minutes} мин</strong></span>
-          <span>Уверенность: <strong>${rect.confidence}</strong></span>
+        <div class="section-label">Задачи развития</div>
+        <div class="tasks-grid-layout">
+          <div class="task-column bg-wood">
+            <div class="task-column-title">Развивай</div>
+            <ul class="task-list-items">
+              ${(tasks.develop || []).map(t => `<li>${t}</li>`).join('')}
+            </ul>
+          </div>
+          <div class="task-column bg-fire">
+            <div class="task-column-title">Отпусти</div>
+            <ul class="task-list-items">
+              ${(tasks.release || []).map(t => `<li>${t}</li>`).join('')}
+            </ul>
+          </div>
+          <div class="task-column bg-metal">
+            <div class="task-column-title">Формируй</div>
+            <ul class="task-list-items">
+              ${(tasks.form || []).map(t => `<li>${t}</li>`).join('')}
+            </ul>
+          </div>
+        </div>
+        <div class="task-summary-text">${tasks.summary || ''}</div>
+      </div>
+
+      <div style="border-left:.5px solid var(--gold-light);padding-left:20px;">
+        <div class="section-label">Специальные влияния (Звёзды)</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          ${starsHtml || '<div class="star-card">Специальных звезд влияния в натальных столпах не обнаружено.</div>'}
         </div>
       </div>
-      <div class="rect-note">${rect.explanation}</div>
-      <div class="rect-events">${evRows}</div>
     </div>
-  </div>`, 6, 6);
+  </div>`, 2, 8);
+}
+
+function renderSpheresPage1(d) {
+  const s4 = d.section4 || {};
+  
+  return page(`
+  <div class="inner">
+    <div class="page-header">
+      <span class="page-header-title">Ключевые Сферы Жизни · Часть 1</span>
+      <span class="page-num">${d.meta.name} · Анализ потенциала</span>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:12px; flex:1;">
+      <!-- Карьера -->
+      <div class="sphere-card-layout" style="padding:12px 16px;">
+        <div class="sphere-card-header" style="font-size:14px;">
+          <span>💼</span> <strong>Карьера и Призвание</strong>
+        </div>
+        <div class="sphere-card-body" style="font-size:11.5px; line-height:1.45;">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <div>
+              <div class="sphere-part-label">Природный потенциал</div>
+              <div>${s4.career?.natural || '—'}</div>
+            </div>
+            <div>
+              <div class="sphere-part-label">Влияние периода (сейчас)</div>
+              <div>${s4.career?.now || '—'}</div>
+            </div>
+          </div>
+          <div style="margin-top: 8px; border-top: 0.5px dashed var(--gold-light); padding-top: 6px; display:grid; grid-template-columns:1.2fr 0.8fr; gap:16px;">
+            <div>
+              <strong>Стиль работы:</strong> ${s4.career?.work_style || '—'}<br/>
+              <strong>Бизнес-потенциал:</strong> ${s4.career?.entrepreneur || '—'}
+            </div>
+            <div>
+              <strong>Рекомендуемые сферы:</strong> ${s4.career?.professions ? s4.career.professions.join(', ') : '—'}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Финансы -->
+      <div class="sphere-card-layout" style="padding:12px 16px;">
+        <div class="sphere-card-header" style="font-size:14px;">
+          <span>💰</span> <strong>Личные Финансы</strong>
+        </div>
+        <div class="sphere-card-body" style="font-size:11.5px; line-height:1.45;">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <div>
+              <div class="sphere-part-label">Природный потенциал</div>
+              <div>${s4.money?.natural || '—'}</div>
+            </div>
+            <div>
+              <div class="sphere-part-label">Влияние периода (сейчас)</div>
+              <div>${s4.money?.now || '—'}</div>
+            </div>
+          </div>
+          <div style="margin-top: 8px; border-top: 0.5px dashed var(--gold-light); padding-top: 6px; display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <div>
+              <strong>Стиль заработка:</strong> ${s4.money?.earning_style || '—'}
+            </div>
+            <div>
+              <strong>Накопления:</strong> ${s4.money?.accumulation || '—'}<br/>
+              <strong>Отношение к рискам:</strong> ${s4.money?.risk || '—'}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Любовь -->
+      <div class="sphere-card-layout" style="padding:12px 16px;">
+        <div class="sphere-card-header" style="font-size:14px;">
+          <span>❤</span> <strong>Любовь и Отношения</strong>
+        </div>
+        <div class="sphere-card-body" style="font-size:11.5px; line-height:1.45;">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <div>
+              <div class="sphere-part-label">Природный потенциал</div>
+              <div>${s4.love?.natural || '—'}</div>
+            </div>
+            <div>
+              <div class="sphere-part-label">Влияние периода (сейчас)</div>
+              <div>${s4.love?.now || '—'}</div>
+            </div>
+          </div>
+          <div style="margin-top: 8px; border-top: 0.5px dashed var(--gold-light); padding-top: 6px; display:grid; grid-template-columns:1.2fr 0.8fr; gap:16px;">
+            <div>
+              <strong>Идеальный тип партнёра:</strong> ${s4.love?.partner_type || '—'}<br/>
+              <strong>Повторяющиеся паттерны:</strong> ${s4.love?.patterns || '—'}
+            </div>
+            <div>
+              <strong>Склонность к браку:</strong> ${s4.love?.tendency || '—'}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`, 3, 8);
+}
+
+function renderSpheresPage2(d) {
+  const s4 = d.section4 || {};
+  const lp = s4.love_patterns || {};
+  
+  return page(`
+  <div class="inner">
+    <div class="page-header">
+      <span class="page-header-title">Ключевые Сферы Жизни · Часть 2</span>
+      <span class="page-num">${d.meta.name} · Анализ потенциала</span>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1.1fr 0.9fr; gap:16px; flex:1;">
+      <!-- Семья, Здоровье, Рост, Творчество -->
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <!-- Семья -->
+        <div class="sphere-card-layout" style="padding:10px 14px;">
+          <div class="sphere-card-header">
+            <span>👨‍👩‍👧</span> <strong>Семья и корни</strong>
+          </div>
+          <div class="sphere-card-body" style="font-size:11px; line-height:1.4;">
+            <div class="sphere-part-label">Природный потенциал</div>
+            <div>${s4.family?.natural || '—'}</div>
+            <div style="margin-top: 4px; border-top: 0.5px dashed var(--gold-light); padding-top: 4px;">
+              <strong>Родители:</strong> ${s4.family?.parents || '—'}<br/>
+              <strong>Дети:</strong> ${s4.family?.children || '—'}<br/>
+              <strong>Сиблинги:</strong> ${s4.family?.siblings || '—'}
+            </div>
+          </div>
+        </div>
+
+        <!-- Здоровье -->
+        <div class="sphere-card-layout" style="padding:10px 14px;">
+          <div class="sphere-card-header">
+            <span>✿</span> <strong>Здоровье и Тело</strong>
+          </div>
+          <div class="sphere-card-body" style="font-size:11px; line-height:1.4;">
+            <div class="sphere-part-label">Конституция и уязвимости</div>
+            <div>${s4.health?.organs || '—'}</div>
+            <div style="margin-top: 4px; border-top: 0.5px dashed var(--gold-light); padding-top: 4px;">
+              <strong>Рекомендации по жизни:</strong> ${s4.health?.lifestyle || '—'}
+            </div>
+          </div>
+        </div>
+
+        <!-- Рост и Творчество -->
+        <div class="two-col-equal" style="gap:10px;">
+          <div class="sphere-card-layout" style="padding:10px 12px;">
+            <div class="sphere-card-header" style="font-size:11px; margin-bottom:4px;">
+              <span>🌱</span> <strong>Самопознание</strong>
+            </div>
+            <div class="sphere-card-body" style="font-size:10.5px; line-height:1.35;">
+              <div>${s4.growth?.natural || '—'}</div>
+            </div>
+          </div>
+          <div class="sphere-card-layout" style="padding:10px 12px;">
+            <div class="sphere-card-header" style="font-size:11px; margin-bottom:4px;">
+              <span>🎨</span> <strong>Творчество</strong>
+            </div>
+            <div class="sphere-card-body" style="font-size:10.5px; line-height:1.35;">
+              <div>${s4.creative?.natural || '—'}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Глубинные паттерны отношений (love_patterns) -->
+      <div style="border-left:0.5px solid var(--gold-light); padding-left:16px; display:flex; flex-direction:column; gap:10px;">
+        <div class="section-label" style="margin-top:0;">Паттерны отношений (Подсознание)</div>
+        
+        <div style="background:var(--cream-dark); border-radius:6px; padding:10px 14px;">
+          <strong style="color:var(--gold); font-size:10.5px; text-transform:uppercase; letter-spacing:0.05em; display:block; margin-bottom:2px;">Проявление любви</strong>
+          <div style="font-size:11px; line-height:1.4; color:var(--ink-mid);">${lp.how_you_love || '—'}</div>
+        </div>
+
+        <div style="background:var(--cream-dark); border-radius:6px; padding:10px 14px;">
+          <strong style="color:var(--gold); font-size:10.5px; text-transform:uppercase; letter-spacing:0.05em; display:block; margin-bottom:2px;">Потребность в близости</strong>
+          <div style="font-size:11px; line-height:1.4; color:var(--ink-mid);">${lp.what_you_need || '—'}</div>
+        </div>
+
+        <div style="background:var(--cream-dark); border-radius:6px; padding:10px 14px;">
+          <strong style="color:var(--gold); font-size:10.5px; text-transform:uppercase; letter-spacing:0.05em; display:block; margin-bottom:2px;">Эмоциональные триггеры</strong>
+          <div style="font-size:11px; line-height:1.4; color:var(--ink-mid);">${lp.triggers || '—'}</div>
+        </div>
+
+        <div style="background:var(--cream-dark); border-radius:6px; padding:10px 14px;">
+          <strong style="color:var(--gold); font-size:11px; text-transform:uppercase; letter-spacing:0.05em; display:block; margin-bottom:2px;">Реакция на стресс / Страх</strong>
+          <div style="font-size:11px; line-height:1.4; color:var(--ink-mid);">${lp.shadow_in_love || '—'}</div>
+        </div>
+
+        <div style="background:var(--cream-dark); border-radius:6px; padding:10px 14px;">
+          <strong style="color:var(--gold); font-size:11px; text-transform:uppercase; letter-spacing:0.05em; display:block; margin-bottom:2px;">Вектор гармонизации</strong>
+          <div style="font-size:11px; line-height:1.4; color:var(--ink-mid);">${lp.growth_in_love || '—'}</div>
+        </div>
+      </div>
+    </div>
+  </div>`, 4, 8);
+}
+
+function renderLuckCyclesPage(d) {
+  const s5 = d.section5 || {};
+
+  const cyclesHtml = (s5.cycles || []).map(c => {
+    return `
+    <div class="luck-cycle-card ${c.is_current ? 'current' : ''}">
+      <div class="luck-cycle-header">
+        <span>Возраст ${c.range} лет</span>
+        <span>Тема: <strong>${c.theme}</strong></span>
+        ${c.is_current ? '<span>[ТЕКУЩИЙ]</span>' : ''}
+      </div>
+      <div class="luck-cycle-details">
+        <div><strong>💼 Карьера:</strong> ${c.career || 'Стабильная.'}</div>
+        <div><strong>💰 Деньги:</strong> ${c.money || 'Ровные.'}</div>
+        <div><strong>❤ Любовь:</strong> ${c.love || 'Взаимопонимание.'}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  return page(`
+  <div class="inner">
+    <div class="page-header">
+      <span class="page-header-title">Жизненные Циклы Ба-цзы</span>
+      <span class="page-num">${d.meta.name} · Такты Удачи</span>
+    </div>
+
+    <div class="section-label">Десятилетние такты судьбы</div>
+    <div class="luck-cycles-list">
+      ${cyclesHtml}
+    </div>
+
+    <div class="section-label">Возрастные пики по сферам</div>
+    <div class="two-col-equal" style="margin-top:10px;">
+      ${Object.entries(s5.peaks || {}).map(([sphere, val]) => {
+        let title = 'Карьера';
+        if (sphere === 'love') title = 'Любовь';
+        if (sphere === 'money') title = 'Деньги';
+        if (sphere === 'health') title = 'Здоровье';
+        if (sphere === 'growth') title = 'Рост';
+        return `
+        <div style="background:var(--cream-dark);padding:10px 14px;border-radius:6px;font-size:11.5px;">
+          <strong>Пик в сфере: ${title}</strong> (возраст ${val.range} лет)<br/>
+          <span style="color:var(--ink-soft);">${val.reason}</span>
+        </div>`;
+      }).join('')}
+    </div>
+
+    <div class="dm-strength-box" style="margin-top:20px;margin-bottom:0;">
+      <strong>Резюме текущего этака:</strong> ${s5.current_summary || ''}
+    </div>
+  </div>`, 5, 8);
+}
+
+function renderGraphForecastPage(d) {
+  const s4 = d.section4 || {};
+  const ins = d.insights || {};
+
+  const timelineHtml = (s4.timeline || []).map(t => `
+  <div class="quarter-card">
+    <div class="quarter-label">${t.label}</div>
+    <div>${t.text}</div>
+  </div>`).join('');
+
+  return page(`
+  <div class="inner">
+    <div class="page-header">
+      <span class="page-header-title">Прогноз и Динамика жизни</span>
+      <span class="page-num">${d.meta.name} · Анализ циклов</span>
+    </div>
+
+    <div class="section-label">График циклов жизни по годам</div>
+    <div class="forecast-chart-container">
+      <svg id="lifechart" width="680" height="230"></svg>
+    </div>
+    <div style="font-size:9.5px;color:var(--ink-soft);text-align:center;margin-top:-6px;margin-bottom:12px;">
+      Влияние годовых столпов судьбы (流年) · Выделен текущий год
+    </div>
+
+    <div class="section-label">Прогноз на ближайшие кварталы</div>
+    <div class="forecast-quarters-grid">
+      ${timelineHtml}
+    </div>
+
+    <div class="section-label">Ключевые Инсайты момента</div>
+    <div class="insights-box-layout">
+      <div class="insight-card-item superpower">
+        <div class="insight-card-title">⚡ Твоя Суперсила</div>
+        <div>${ins.superpower || 'Внутренний ресурс.'}</div>
+      </div>
+      <div class="insight-card-item trap">
+        <div class="insight-card-title">🌀 Твоя Ловушка</div>
+        <div>${ins.trap || 'Зона сомнений.'}</div>
+      </div>
+      <div class="insight-card-item advice">
+        <div class="insight-card-title">💡 Совет дня</div>
+        <div>${ins.advice || 'Действуй легко.'}</div>
+      </div>
+    </div>
+  </div>`, 6, 8);
+}
+
+function renderDestinyPage(d) {
+  const s6 = d.section6 || {};
+  const themes = s6.recurring_themes || [];
+  
+  return page(`
+  <div class="inner">
+    <div class="page-header">
+      <span class="page-header-title">Карта предназначения</span>
+      <span class="page-num">${d.meta.name} · Духовный путь</span>
+    </div>
+    
+    <div class="section-label">Жизненная задача и предназначение</div>
+    <div class="text-block" style="font-size:13px; text-align:justify; line-height:1.65; margin-bottom: 16px;">
+      ${s6.destiny || 'Твоя жизненная задача предназначения формируется...'}
+    </div>
+    
+    ${themes.length ? `
+    <div class="section-label">Повторяющиеся жизненные темы</div>
+    <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;">
+      ${themes.map(t => `<span style="background:var(--gold-pale); border:0.5px solid var(--gold-light); color:var(--ink-mid); padding:4px 10px; border-radius:12px; font-size:11px;">${t}</span>`).join('')}
+    </div>
+    ` : ''}
+    
+    <div class="two-col-layout" style="flex: 1; grid-template-columns: 1fr 1fr; gap:16px; margin-top: 10px;">
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <div style="background:var(--cream-dark); border-radius:6px; padding:10px 14px;">
+          <strong style="color:var(--gold); font-size:11px; text-transform:uppercase; letter-spacing:0.05em; display:block; margin-bottom:4px;">🎁 Природные таланты (flow)</strong>
+          <div style="font-size:11.5px; line-height:1.45; color:var(--ink-mid);">${s6.natural_gifts || '—'}</div>
+        </div>
+        <div style="background:var(--cream-dark); border-radius:6px; padding:10px 14px;">
+          <strong style="color:var(--gold); font-size:11px; text-transform:uppercase; letter-spacing:0.05em; display:block; margin-bottom:4px;">📈 Зона осознанного роста</strong>
+          <div style="font-size:11.5px; line-height:1.45; color:var(--ink-mid);">${s6.work_areas || '—'}</div>
+        </div>
+        <div style="background:var(--cream-dark); border-radius:6px; padding:10px 14px;">
+          <strong style="color:var(--gold); font-size:11px; text-transform:uppercase; letter-spacing:0.05em; display:block; margin-bottom:4px;">📍 Благоприятные направления</strong>
+          <div style="font-size:11.5px; line-height:1.45; color:var(--ink-mid);">${s6.directions || '—'}</div>
+        </div>
+      </div>
+      
+      <div style="display:flex; flex-direction:column; gap:12px; border-left:0.5px solid var(--gold-light); padding-left:16px;">
+        <div style="background:var(--cream-dark); border-radius:6px; padding:10px 14px;">
+          <strong style="color:var(--gold); font-size:11px; text-transform:uppercase; letter-spacing:0.05em; display:block; margin-bottom:4px;">🧭 Духовный путь (зрелость)</strong>
+          <div style="font-size:11.5px; line-height:1.45; color:var(--ink-mid);">${s6.spiritual || '—'}</div>
+        </div>
+        <div style="background:var(--cream-dark); border-radius:6px; padding:10px 14px;">
+          <strong style="color:var(--gold); font-size:11px; text-transform:uppercase; letter-spacing:0.05em; display:block; margin-bottom:4px;">🧬 Родовые программы и паттерны</strong>
+          <div style="font-size:11.5px; line-height:1.45; color:var(--ink-mid);">${s6.ancestral || '—'}</div>
+        </div>
+      </div>
+    </div>
+  </div>`, 7, 8);
+}
+
+function renderPersonalMessagePage(d) {
+  const text = d.simple || '';
+  const paragraphs = text.split('\n\n').filter(Boolean);
+  const letterBody = paragraphs.map(p => `<p>${p}</p>`).join('');
+
+  return page(`
+  <div class="inner">
+    <div class="page-header">
+      <span class="page-header-title">Простыми словами</span>
+      <span class="page-num">${d.meta.name} · Вместо заключения</span>
+    </div>
+
+    <div class="personal-letter">
+      ${letterBody}
+    </div>
+    <div class="tz-note" style="margin-top:20px;text-align:center;">
+      Паспорт жизни составлен по китайской метафизической системе Ба-цзы.<br/>
+      Расчеты произведены с коррекцией времени рождения по координатам места рождения.
+    </div>
+  </div>`, 8, 8);
+}
+
+function renderLifechart(annual) {
+  const svg = document.getElementById('lifechart');
+  if (!svg || !annual || !annual.length) return;
+
+  svg.innerHTML = '';
+
+  const W = 680, H = 230;
+  const PAD = { left: 30, right: 16, top: 12, bottom: 32 };
+  const cw = W - PAD.left - PAD.right;
+  const ch = H - PAD.top - PAD.bottom;
+  const n  = annual.length;
+  if (n < 2) return;
+
+  const nowYear = new Date().getFullYear();
+
+  function xPos(i) { return PAD.left + i * cw / (n - 1); }
+  function yPos(v) { return PAD.top + ch - (Math.max(1, Math.min(10, v)) - 1) / 9 * ch; }
+
+  function el(tag, attrs = {}) {
+    const e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    Object.entries(attrs).forEach(([k, v]) => e.setAttribute(k, v));
+    return e;
+  }
+  function txt(content, attrs = {}) {
+    const t = el('text', attrs);
+    t.textContent = content;
+    return t;
+  }
+
+  // Current year vertical highlight
+  const nowIdx = annual.findIndex(p => p.year === nowYear);
+  if (nowIdx >= 0) {
+    const x = xPos(nowIdx);
+    svg.appendChild(el('rect', {
+      x: x - 8, y: PAD.top, width: 16, height: ch,
+      fill: 'rgba(184,154,106,0.08)', rx: 3
+    }));
+  }
+
+  // Horizontal grid
+  for (let g = 2; g <= 10; g += 2) {
+    const y = yPos(g);
+    svg.appendChild(el('line', {
+      x1: PAD.left, y1: y, x2: W - PAD.right, y2: y,
+      stroke: 'rgba(26,23,20,0.06)',
+      'stroke-dasharray': '2 4'
+    }));
+    svg.appendChild(txt(g, {
+      x: PAD.left - 6, y: y + 3, fill: '#8a837a',
+      'font-size': '8.5', 'text-anchor': 'end', 'font-family': 'sans-serif'
+    }));
+  }
+
+  // Smooth Catmull-Rom bezier path
+  function smoothPath(points) {
+    if (points.length < 2) return '';
+    const d = [`M ${points[0].x} ${points[0].y}`];
+    for (let i = 1; i < points.length; i++) {
+      const p0 = points[Math.max(i - 2, 0)];
+      const p1 = points[i - 1];
+      const p2 = points[i];
+      const p3 = points[Math.min(i + 1, points.length - 1)];
+      const cp1x = p1.x + (p2.x - p0.x) / 6;
+      const cp1y = p1.y + (p2.y - p0.y) / 6;
+      const cp2x = p2.x - (p3.x - p1.x) / 6;
+      const cp2y = p2.y - (p3.y - p1.y) / 6;
+      d.push(`C ${cp1x} ${cp1y} ${cp2x} ${cp2y} ${p2.x} ${p2.y}`);
+    }
+    return d.join(' ');
+  }
+
+  // Render 3 key metrics (Love, Money, Career) for clean print
+  const metricsToRender = [
+    { key: 'love',     color: '#d32f2f' }, // Red
+    { key: 'money',    color: '#f57c00' }, // Orange
+    { key: 'career',   color: '#1976d2' }  // Blue
+  ];
+
+  metricsToRender.forEach(({ key, color }) => {
+    const points = annual.map((p, i) => ({ x: xPos(i), y: yPos(p[key] ?? 5) }));
+    const path = el('path', {
+      d: smoothPath(points), fill: 'none',
+      stroke: color, 'stroke-width': '1.5',
+      'stroke-linecap': 'round', opacity: '0.8'
+    });
+    svg.appendChild(path);
+  });
+
+  // Render Legend
+  const legendItems = [
+    { name: 'Любовь', color: '#d32f2f' },
+    { name: 'Деньги', color: '#f57c00' },
+    { name: 'Карьера', color: '#1976d2' }
+  ];
+  legendItems.forEach((lg, idx) => {
+    const x = PAD.left + idx * 80;
+    const y = H - 6;
+    svg.appendChild(el('circle', { cx: x, cy: y - 3, r: 3, fill: lg.color }));
+    svg.appendChild(txt(lg.name, {
+      x: x + 8, y, fill: '#4a4540',
+      'font-size': '9', 'font-family': 'sans-serif'
+    }));
+  });
+
+  // X-axis labels — show every 5 years
+  const step = n > 25 ? 5 : n > 15 ? 3 : 2;
+  annual.forEach((p, i) => {
+    if (i % step !== 0 && i !== n - 1) return;
+    const x = xPos(i);
+    svg.appendChild(txt(`${p.year}`, {
+      x, y: H - PAD.bottom + 12, fill: '#8a837a',
+      'font-size': '8.5', 'text-anchor': 'middle', 'font-family': 'sans-serif'
+    }));
+    svg.appendChild(txt(`${p.age}л`, {
+      x, y: H - PAD.bottom + 22, fill: '#4a4540',
+      'font-size': '7.5', 'text-anchor': 'middle', 'font-family': 'sans-serif'
+    }));
+  });
 }
 
 /* ── MOUNT ── */
@@ -1033,9 +1356,7 @@ const urlParams = new URLSearchParams(window.location.search);
 const isPreview = urlParams.get('preview') === '1';
 
 if (isPreview) {
-  // Отображаем только обложку для превью
   document.getElementById('root').innerHTML = renderCover(DATA);
-  // Применяем стили превью-режима
   document.body.style.padding = '0';
   document.body.style.margin = '0';
   document.body.style.background = 'transparent';
@@ -1046,7 +1367,6 @@ if (isPreview) {
   const printBar = document.querySelector('.no-print');
   if (printBar) printBar.style.display = 'none';
 
-  // Функция авто-масштабирования страницы под размер фрейма
   const scalePage = () => {
     const pageEl = document.querySelector('.page');
     if (!pageEl) return;
@@ -1071,11 +1391,19 @@ if (isPreview) {
 } else {
   document.getElementById('root').innerHTML =
     renderCover(DATA) +
-    renderChartPage(DATA) +
-    renderAspectsPage(DATA) +
-    renderPeriodsPage(DATA) +
-    renderForecastPage(DATA) +
-    renderRectificationPage(DATA);
+    renderBaziChartPage(DATA) +
+    renderProfilePage(DATA) +
+    renderSpheresPage1(DATA) +
+    renderSpheresPage2(DATA) +
+    renderLuckCyclesPage(DATA) +
+    renderGraphForecastPage(DATA) +
+    renderDestinyPage(DATA) +
+    renderPersonalMessagePage(DATA);
+
+  // Render lifechart graph
+  setTimeout(() => {
+    renderLifechart(DATA.annualScores);
+  }, 100);
 }
 </script>
 </body>

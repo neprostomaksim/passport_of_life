@@ -1,12 +1,8 @@
 # Использовать официальный образ Node.js (Debian Bullseye)
 FROM node:20-bullseye-slim
 
-# Установка системных зависимостей для Python, компиляции (kerykeion/pyswisseph) и Puppeteer (Chromium)
+# Установка системных зависимостей для Puppeteer (Chromium)
 RUN apt-get update && apt-get install -y \
-    python3 \
-    python3-pip \
-    python3-venv \
-    build-essential \
     libxss1 \
     libatk1.0-0 \
     libatk-bridge2.0-0 \
@@ -31,12 +27,6 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 # Создаем рабочую директорию
 WORKDIR /app
-
-# Копируем зависимости Python и создаем виртуальное окружение
-COPY requirements.txt ./
-RUN python3 -m venv /app/.venv
-ENV PATH="/app/.venv/bin:$PATH"
-RUN pip3 install --no-cache-dir -r requirements.txt
 
 # Копируем зависимости бэкенда Node.js
 COPY rb-backend/package*.json ./rb-backend/

@@ -257,6 +257,7 @@ function Hero({ onStart, error }) {
   const [bdate, setBdate] = useStateL('');
   const [btime, setBtime] = useStateL('');
   const [place, setPlace] = useStateL('');
+  const [gender, setGender] = useStateL('female');
   const [unknown, setUnknown] = useStateL(false);
   const [events, setEvents] = useStateL(EVENT_PLACEHOLDERS.map(() => ({ date: '', title: '' })));
   const [err, setErr] = useStateL({});
@@ -272,7 +273,7 @@ function Hero({ onStart, error }) {
     if (!unknown && !btime) next.btime = 'Укажите время рождения';
     setErr(next);
     if (Object.keys(next).length === 0) {
-      onStart({ name, email, bdate, btime, place, unknown, events });
+      onStart({ name, email, bdate, btime, place, unknown, events, gender });
     } else {
       // scroll the form into view region softly
       const f = document.getElementById('form-hero');
@@ -330,6 +331,14 @@ function Hero({ onStart, error }) {
               <input type="email" value={email} onChange={e => setEmail(e.target.value)}
                 className="field w-full rounded-xl px-4 py-3 font-sans text-[15px]"
                 placeholder="you@stars.com" />
+            </FormField>
+
+            <FormField label="Пол" error={err.gender}>
+              <select value={gender} onChange={e => setGender(e.target.value)}
+                className="field w-full rounded-xl px-4 py-3 font-sans text-[15px] bg-[#1A1338] text-[#EDEAF5] border border-gold/20 outline-none">
+                <option value="female">Женский</option>
+                <option value="male">Мужской</option>
+              </select>
             </FormField>
 
             <div className={`grid gap-4 ${unknown ? 'grid-cols-1' : 'grid-cols-2'}`}>

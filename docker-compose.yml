@@ -11,11 +11,12 @@ services:
       - "3000:3000"
     environment:
       - PORT=3000
-      - BEPAID_SHOP_ID=test_shop_id
-      - BEPAID_SECRET_KEY=test_secret_key
-      - BEPAID_AMOUNT=2900
-      - PUBLIC_URL=http://localhost:3000
-      - PASSPORT_USE_AI=false
+      - BEPAID_SHOP_ID=${BEPAID_SHOP_ID}
+      - BEPAID_SECRET_KEY=${BEPAID_SECRET_KEY}
+      - BEPAID_AMOUNT=${BEPAID_AMOUNT:-2900}
+      - PUBLIC_URL=${PUBLIC_URL}
+      - PASSPORT_USE_AI=${PASSPORT_USE_AI:-true}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
     volumes:
       # Сохраняем базу данных SQLite на сервере, чтобы она не стиралась при перезапуске
       - ./rb-backend/data:/app/rb-backend/data

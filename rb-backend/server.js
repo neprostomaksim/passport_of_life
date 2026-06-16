@@ -12,6 +12,7 @@ const cors    = require('cors');
 const { v4: uuidv4 } = require('uuid');
 const db = require('./db');
 const { generatePDF, getCustomizedHTML } = require('./pdf/generate');
+const { calculateBaZi, formatChart, getAnnualPillars, ganzhiLabel } = require('./bazi-calc');
 
 // Загружаем секреты/настройки из .env
 require('dotenv').config();
@@ -233,36 +234,114 @@ app.get('/api/payments/mock-checkout-page', (req, res) => {
   res.send(html);
 });
 
-/**
- * Преобразует поля формы и форматирует даты под требования Python-движка.
- */
-function formatDataForPython(formData) {
-  const formatDate = (dateStr) => {
-    if (!dateStr) return '';
-    const parts = dateStr.split('-');
-    if (parts.length === 3) {
-      return `${parts[2]}.${parts[1]}.${parts[0]}`; // YYYY-MM-DD -> DD.MM.YYYY
+const ANNUAL_SCORE_PROMPT = `Ты — профессиональный аналитик карты Ба-цзы.
+
+Перед тобой натальная карта и список 流年 (годовых столпов) с возрастом для каждого года.
+
+Твоя задача: оценить каждый год по 8 сферам жизни по шкале 1–10.
+1–3 = сложный / ресурс слабый   4–6 = умеренный / переходный   7–9 = благоприятный   10 = пиковый
+
+Применяй правила Ба-цзы:
+• Если 流年 стебель поддерживает или питает Господина дня → повышай оценки карьеры, финансов, роста.
+• Если 流年 стебель контролирует или истощает Господина дня → понижай оценки здоровья, отношений.
+• Учитывай взаимодействие ветвей 流年 с ветвями натальных столпов (合 гармония, 冲 конфликт, 刑 наказание).
+• Активный десятилетний такт удачи задаёт базовый фон для всех лет этого десятилетия.
+
+7 сфер (колесо баланса):
+• love     — любовь и отношения (романтика, партнёрство, близость)
+• money    — деньги и материальное (доходы, накопления, финансы)
+• career   — карьера и призвание (профессиональное развитие, реализация)
+• family   — семья и род (близкие, дети, родители)
+• health   — здоровье и тело (физическое и психологическое состояние)
+• growth   — саморазвитие и духовный путь (обучение, внутренний рост, смысл)
+• creative — творчество и самовыражение (хобби, проекты, радость, самопроявление)
+
+Верни ТОЛЬКО валидный JSON — без пояснений, без markdown-блоков:
+{"annual":[{"year":1999,"age":14,"love":6,"money":5,"career":7,"family":4,"health":6,"growth":7,"creative":5},...]}
+`;
+
+function buildAnnualScoringPrompt(chart) {
+  const { dayMaster, elementBalance, luckyPillars, year, month, day, hour, birthdate } = chart;
+  const birthYear  = Number(birthdate.split('-')[0]);
+  const currentYear = new Date().getFullYear();
+  const endYear    = currentYear + 3;
+
+  const elemOrder = ['Дерево','Огонь','Земля','Металл','Вода'];
+  const elemLine  = elemOrder.map(e => `${e} ${elementBalance[e] ?? 0}%`).join(', ');
+
+  const luckyLines = luckyPillars.pillars
+    .map(p => `  ${p.startAge}–${p.endAge} (${p.startYear}–${p.startYear + 9}): ${ganzhiLabel(p)}`)
+    .join('\n');
+
+  const annualList = getAnnualPillars(birthYear, endYear)
+    .map(p => `  ${p.year} | возраст ${p.age} | ${p.ganzhi} (${p.stemName} / ${p.branchName})`)
+    .join('\n');
+
+  return ANNUAL_SCORE_PROMPT
+    + `НАТАЛЬНАЯ КАРТА:\n`
+    + `Господин дня: ${dayMaster.stem} — ${dayMaster.name} (${dayMaster.element})\n`
+    + `Четыре столпа: год ${ganzhiLabel(year)}, месяц ${ganzhiLabel(month)}, день ${ganzhiLabel(day)}, час ${ganzhiLabel(hour)}\n`
+    + `Баланс элементов: ${elemLine}\n`
+    + `Десятилетние такты удачи:\n${luckyLines}\n`
+    + `\nГОДОВЫЕ СТОЛПЫ (流年) — от ${birthYear + 14} до ${endYear}:\n`
+    + annualList;
+}
+
+function buildInterpretPrompt(chartText, name, gender, birthYear) {
+  const template = fs.readFileSync(
+    path.join(__dirname, 'prompt', 'basci-interpret-v2.txt'),
+    'utf-8'
+  );
+  const genderLabel  = gender === 'female' ? 'Женский' : 'Мужской';
+  const currentYear  = new Date().getFullYear();
+  const currentAge   = currentYear - Number(birthYear);
+  const cycleStart   = Math.floor(currentAge / 7) * 7;
+  const nextCycleEnd = cycleStart + 14;
+
+  return template
+    .replace('[ПОЛ]', genderLabel)
+    .replace('[КАРТА]', chartText)
+    + `\n\nИмя человека: ${name}`
+    + `\nТекущая дата: ${new Date().toLocaleDateString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' })}`
+    + `\nТекущий год: ${currentYear}`
+    + `\nТекущий возраст: ${currentAge} лет`
+    + `\nТекущий 7-летний цикл: ${cycleStart}–${cycleStart + 7} (is_current: true)`
+    + `\nПоследний цикл для отображения: ${cycleStart + 7}–${nextCycleEnd} (один цикл после текущего — больше не надо)`;
+}
+
+async function callOpenAI(prompt, model = 'gpt-4o', retries = 3) {
+  const OpenAI = require('openai');
+  const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  const O_SERIES_MODELS = new Set(['o1', 'o1-mini', 'o3', 'o3-mini', 'o4-mini']);
+  const isOSeries = O_SERIES_MODELS.has(model);
+  const params = {
+    model,
+    messages: [{ role: 'user', content: prompt }],
+    ...(isOSeries ? { max_completion_tokens: 8192 } : { max_tokens: 8192 })
+  };
+  
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const completion = await client.chat.completions.create(params);
+      return completion.choices[0]?.message?.content || '';
+    } catch (err) {
+      console.warn(`[OpenAI] Attempt ${attempt} failed: ${err.message || err}`);
+      if (attempt === retries) throw err;
+      // Wait before next attempt
+      await new Promise(resolve => setTimeout(resolve, attempt * 3000));
     }
-    return dateStr;
-  };
+  }
+}
 
-  const events = (formData.events || [])
-    .filter(e => e.date && e.title)
-    .map(e => ({
-      date: formatDate(e.date),
-      label: e.title
-    }));
-
-  return {
-    name: formData.name,
-    dob: formatDate(formData.bdate),
-    pob: formData.place,
-    tob: formData.unknown ? null : (formData.btime || null),
-    time_unknown: !!formData.unknown,
-    email: formData.email || null,
-    events: events,
-    use_ai: process.env.PASSPORT_USE_AI === 'true'
-  };
+async function callClaude(prompt, model = 'claude-opus-4-5') {
+  const Anthropic = require('@anthropic-ai/sdk');
+  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  const message = await client.messages.create({
+    model,
+    max_tokens: 8192,
+    messages: [{ role: 'user', content: prompt }],
+  });
+  return message.content[0]?.text || '';
 }
 
 /**
@@ -273,17 +352,222 @@ function runBackgroundProcessing(orderId, formData) {
     try {
       console.log(`[Processing] Starting calculations for order ${orderId}...`);
 
-      const response = await fetch('http://127.0.0.1:8000/api/passport', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formatDataForPython(formData))
-      });
+      const name = formData.name;
+      const birthdate = formData.bdate; // YYYY-MM-DD
+      const birthplace = formData.place;
+      const gender = formData.gender || 'female';
+      const unknown = !!formData.unknown;
+      // Если время неизвестно, считаем карту на полдень (12:00)
+      const birthtime = unknown ? '12:00' : (formData.btime || '12:00');
+      const tzOffset = null;
 
-      if (!response.ok) {
-        throw new Error(`Python engine error: ${await response.text()}`);
+      console.log(`[Bazi Calc] name: ${name}, dob: ${birthdate}, tob: ${birthtime}, unknown: ${unknown}, pob: ${birthplace}, gender: ${gender}`);
+
+      const chart = await calculateBaZi({ name, birthdate, birthtime, birthplace, gender, tzOffset });
+      const chartText = formatChart(chart);
+
+      let interpretation = null;
+      let annualScores = null;
+
+      const hasOpenAI = !!process.env.OPENAI_API_KEY;
+      const hasClaude = !!process.env.ANTHROPIC_API_KEY;
+
+      if (process.env.PASSPORT_USE_AI === 'true' && (hasOpenAI || hasClaude)) {
+        console.log(`[AI] Generating interpretation for ${name}...`);
+
+        const birthYear = birthdate.split('-')[0];
+        const interpretPrompt = buildInterpretPrompt(chartText, name, gender, birthYear);
+
+        let rawText = '';
+        const provider = hasClaude ? 'claude' : 'openai';
+        const model = provider === 'claude' ? 'claude-opus-4-5' : 'gpt-4o-mini';
+
+        if (provider === 'openai') {
+          rawText = await callOpenAI(interpretPrompt, model);
+        } else {
+          rawText = await callClaude(interpretPrompt, model);
+        }
+
+        const stripHieroglyphs = (s) =>
+          s.replace(/[\u2E80-\u2EFF\u2F00-\u2FDF\u3000-\u303F\u3040-\u30FF\u3100-\u31FF\u3200-\u32FF\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF\uFE30-\uFE4F]/gu, '');
+
+        rawText = stripHieroglyphs(rawText);
+
+        const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) {
+          throw new Error('AI interpretation response did not contain valid JSON');
+        }
+
+        interpretation = JSON.parse(jsonMatch[0]);
+
+        console.log(`[AI] Generating annual scores for ${name}...`);
+        const scoresPrompt = buildAnnualScoringPrompt(chart);
+        let scoresRaw = '';
+        if (hasOpenAI) {
+          scoresRaw = await callOpenAI(scoresPrompt, 'gpt-4o-mini');
+        } else {
+          scoresRaw = await callClaude(scoresPrompt, 'claude-3-5-haiku-20241022');
+        }
+
+        const scoresMatch = scoresRaw.match(/\{[\s\S]*\}/);
+        if (scoresMatch) {
+          annualScores = JSON.parse(scoresMatch[0]).annual;
+        }
       }
 
-      const passportJson = await response.json();
+      // Офлайн заглушка, если ИИ выключен или нет ключей
+      if (!interpretation) {
+        console.log(`[Offline Mode] Using demo mock interpretation for ${name}...`);
+        interpretation = {
+          section1: `Это демонстрационная версия отчёта Ба-цзы для ${name}, так как ИИ-интерпретация отключена или отсутствуют API-ключи в файле конфигурации .env.`,
+          section3: {
+            portrait: `В твоей природе заложена гармония и стремление к росту. Твой характер сочетает черты устойчивости и гибкости.`,
+            strengths: [
+              { name: "Устойчивость", desc: "Умение сохранять внутреннее спокойствие в любых ситуациях." },
+              { name: "Аналитичность", desc: "Способность видеть скрытые взаимосвязи и глубокие смыслы." }
+            ],
+            shadows: [
+              { name: "Склонность к сомнениям", body: "Периодический перегруз мыслями мешает быстро делать выбор.", lesson: "Доверяй своей первой интуитивной реакции." }
+            ],
+            tasks: {
+              develop: ["Уверенность в своих решениях", "Практики заземления"],
+              release: ["Потребность контролировать всё вокруг"],
+              form: ["Новые привычки заботы о физическом теле"],
+              summary: "Когда эти задачи будут выполнены, ты почувствуешь огромный прилив сил."
+            }
+          },
+          section4: {
+            love: {
+              natural: "Искренность и забота о близких.",
+              now: "Период благоприятен для укрепления союзов.",
+              partner_type: "Внимательный партнер, ценящий верность и стабильность.",
+              patterns: "Склонность брать на себя слишком много эмоциональной ответственности.",
+              tendency: "Ориентация на долгосрочный семейный союз."
+            },
+            love_patterns: {
+              how_you_love: "Проявляешь заботу через конкретные дела и внимание к мелочам.",
+              what_you_need: "Тебе важно чувствовать эмоциональную безопасность и стабильность.",
+              triggers: "Остро реагируешь на эмоциональную холодность или недоверие.",
+              shadow_in_love: "При испуге склонна временно отдаляться для самозащиты.",
+              growth_in_love: "Важно развивать открытый диалог о своих глубинных потребностях."
+            },
+            money: {
+              natural: "Практичный подход и умение копить.",
+              now: "Финансовая энергия стабильна.",
+              earning_style: "Через экспертные знания и интеллектуальный труд.",
+              accumulation: "Склонность к планомерному накоплению сбережений.",
+              risk: "Консервативное отношение, избегание неоправданных рисков."
+            },
+            career: {
+              natural: "Склонность к аналитической или помогающей деятельности.",
+              now: "Хорошее время для обучения.",
+              professions: ["Психолог", "Аналитик", "Консультант"],
+              work_style: "Предпочитает экспертную работу в спокойной атмосфере.",
+              entrepreneur: "Умеренный бизнес-потенциал, лучше в партнерстве."
+            },
+            family: {
+              natural: "Глубокая привязанность к семейным ценностям.",
+              now: "Взаимопонимание с близкими.",
+              parents: "Уважение к традициям и поддержка старшего поколения.",
+              children: "Ответственный подход к воспитанию детей.",
+              siblings: "Теплые дружеские отношения при сохранении личных границ."
+            },
+            health: {
+              natural: "Высокая чувствительность нервной системы.",
+              now: "Рекомендуется больше отдыхать.",
+              organs: "Уязвимы нервная система и органы пищеварения.",
+              lifestyle: "Регулярный сон, прогулки на воздухе и заземляющие практики."
+            },
+            growth: { natural: "Постоянное стремление к самопознанию.", now: "Период глубоких внутренних инсайтов." },
+            creative: { natural: "Творческое выражение через текст или музыку.", now: "Благоприятные условия для хобби." },
+            timeline: [
+              { label: "Q3 2026", text: "Период адаптации и планирования." },
+              { label: "Q4 2026", text: "Фокус на рабочих целях и финансах." },
+              { label: "Q1 2027", text: "Время для отдыха и личных отношений." },
+              { label: "Q2 2027", text: "Активное проявление в социуме." }
+            ]
+          },
+          section5: {
+            cycles: chart.luckyPillars.pillars.map(p => {
+              const age = `${p.startAge}–${p.endAge}`;
+              const isCur = chart.currentAge >= p.startAge && chart.currentAge <= p.endAge;
+              return {
+                range: age,
+                theme: `Период ${p.ganzhi}`,
+                 is_current: isCur,
+                love: "Стабильный эмоциональный фон.",
+                money: "Рост материальной устойчивости.",
+                career: "Обретение экспертного статуса."
+              };
+            }).slice(0, 5),
+            peaks: {
+              love: { range: "28–35", reason: "Благоприятное сочетание элементов." },
+              money: { range: "35–42", reason: "Усиление элемента богатства." },
+              career: { range: "42–49", reason: "Период максимальной самореализации." }
+            },
+            current_summary: `Сейчас ты находишься в активном периоде, который требует внимания к балансу работы и личной жизни.`
+          },
+          section6: {
+            destiny: "Твоя главная жизненная задача — раскрыть свой природный потенциал и научиться доверять себе.",
+            recurring_themes: ["Поиск внутренней опоры", "Гармонизация отношений", "Финансовая независимость"],
+            natural_gifts: "Твой природный талант — умение слышать людей и давать мудрые советы.",
+            work_areas: "Сознательное развитие эмоционального интеллекта и границ в общении.",
+            spiritual: "Путь к глубокой внутренней мудрости и покою.",
+            ancestral: "Семейный опыт даёт тебе силу преодолевать любые жизненные испытания.",
+            directions: "Благоприятные направления — Восток и Юг."
+          },
+          insights: {
+            superpower: "Умение быстро находить решения в сложных ситуациях.",
+            trap: "Желание сделать всё идеально с первого раза.",
+            advice: "Позволь себе действовать из состояния лёгкости."
+          },
+          simple: `Привет! Твоя карта Ба-цзы показывает, что ты обладаешь сильной врождённой интуицией. Сейчас наступает время, когда нужно перестать сомневаться и начать действовать. Удели внимание своему здоровью, чаще отдыхай и доверяй ходу событий. Всё складывается наилучшим образом для тебя.`
+        };
+      }
+
+      if (!annualScores) {
+        const startYear = Number(birthdate.split('-')[0]) + 14;
+        const currentYear = new Date().getFullYear();
+        annualScores = [];
+        for (let y = startYear; y <= currentYear + 3; y++) {
+          const age = y - Number(birthdate.split('-')[0]);
+          annualScores.push({
+            year: y,
+            age,
+            love: 5 + Math.floor(Math.sin(y) * 3),
+            money: 6 + Math.floor(Math.cos(y) * 2),
+            career: 5 + Math.floor(Math.sin(y / 2) * 3),
+            family: 7 + Math.floor(Math.cos(y / 2) * 2),
+            health: 6 + Math.floor(Math.sin(y / 3) * 2),
+            growth: 7 + Math.floor(Math.cos(y / 3) * 2),
+            creative: 5 + Math.floor(Math.sin(y / 4) * 3)
+          });
+        }
+      }
+
+      const dateParts = birthdate.split('-'); // YYYY-MM-DD
+      const dobFormatted = `${dateParts[2]}.${dateParts[1]}.${dateParts[0]}`;
+
+      const passportJson = {
+        meta: {
+          name,
+          dob: dobFormatted,
+          tob: unknown ? '—' : birthtime,
+          pob: birthplace,
+          gender,
+          timezone_note: `UTC${chart.tz >= 0 ? '+' : ''}${chart.tz} (на основе долготы места рождения)`
+        },
+        chart,
+        annualScores,
+        section1: interpretation.section1,
+        section3: interpretation.section3,
+        section4: interpretation.section4,
+        section5: interpretation.section5,
+        section6: interpretation.section6,
+        insights: interpretation.insights,
+        simple: interpretation.simple
+      };
+
       const pdfPath = await generatePDF(orderId, passportJson);
 
       db.markSuccess(orderId, passportJson, pdfPath);
@@ -437,17 +721,34 @@ app.get('/api/orders/:id/preview', async (req, res) => {
     if (order.passport_json) {
       passportJson = JSON.parse(order.passport_json);
     } else {
-      // Расчитываем на лету, если заказ еще не оплачен / не сгенерирован
       const formData = JSON.parse(order.form_data);
-      const response = await fetch('http://127.0.0.1:8000/api/passport', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formatDataForPython(formData))
-      });
-      if (!response.ok) {
-        throw new Error(`Python engine preview error: ${await response.text()}`);
-      }
-      passportJson = await response.json();
+      const name = formData.name;
+      const birthdate = formData.bdate;
+      const birthplace = formData.place;
+      const gender = formData.gender || 'female';
+      const unknown = !!formData.unknown;
+      const birthtime = unknown ? '12:00' : (formData.btime || '12:00');
+      const tzOffset = null;
+
+      const chart = await calculateBaZi({ name, birthdate, birthtime, birthplace, gender, tzOffset });
+
+      passportJson = {
+        meta: {
+          name,
+          dob: birthdate.split('-').reverse().join('.'),
+          tob: unknown ? '—' : birthtime,
+          pob: birthplace,
+          gender,
+          timezone_note: `UTC${chart.tz >= 0 ? '+' : ''}${chart.tz}`
+        },
+        chart,
+        section1: "Предпросмотр Паспорта Жизни...",
+        section3: { portrait: "", strengths: [], shadows: [], tasks: {} },
+        section4: { timeline: [] },
+        section5: { cycles: [] },
+        section6: {},
+        insights: {}
+      };
     }
 
     const html = getCustomizedHTML(passportJson);
@@ -470,26 +771,4 @@ app.listen(PORT, () => {
   console.log(`    Health:   http://localhost:${PORT}/health\n`);
 });
 
-// ── Автозапуск Python-микросервиса ──────────────────────────────
-const { spawn } = require('child_process');
-const pyPath = path.join(__dirname, '..', '.venv', 'bin', 'python');
-const pyCmd = fs.existsSync(pyPath) ? pyPath : 'python3';
-const pyArgs = ['-m', 'uvicorn', 'api:app', '--host', '127.0.0.1', '--port', '8000'];
-
-console.log(`Starting Python calculation service using: ${pyCmd} ${pyArgs.join(' ')}`);
-const pyProcess = spawn(pyCmd, pyArgs, {
-  cwd: path.join(__dirname, '..')
-});
-
-pyProcess.stdout.on('data', (data) => {
-  console.log(`[Python] ${data.toString().trim()}`);
-});
-
-pyProcess.stderr.on('data', (data) => {
-  console.error(`[Python stderr] ${data.toString().trim()}`);
-});
-
-process.on('exit', () => {
-  console.log('Stopping Python calculation service...');
-  pyProcess.kill();
-});
+// Python spawn removed
