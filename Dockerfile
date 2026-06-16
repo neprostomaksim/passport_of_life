@@ -1,8 +1,10 @@
 # Использовать официальный образ Node.js (Debian Bullseye)
 FROM node:20-bullseye-slim
 
-# Установка системных зависимостей для Puppeteer (Chromium)
+# Установка системных зависимостей для Puppeteer (Chromium) и компиляции C++ модулей (better-sqlite3)
 RUN apt-get update && apt-get install -y \
+    python3 \
+    build-essential \
     libxss1 \
     libatk1.0-0 \
     libatk-bridge2.0-0 \
